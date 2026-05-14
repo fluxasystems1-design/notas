@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Mis apuntes de Claude · prompts y guía</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  /* ---------- Reset y base ---------- */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    /* Aurora dream corner whispers (mismo stack que background-gradient-glow) */
+    --surface-gradient:
+      radial-gradient(ellipse 85% 65% at 8% 8%, rgba(175, 109, 255, 0.42), transparent 60%),
+      radial-gradient(ellipse 75% 60% at 75% 35%, rgba(255, 235, 170, 0.55), transparent 62%),
+      radial-gradient(ellipse 70% 60% at 15% 80%, rgba(255, 100, 180, 0.40), transparent 62%),
+      radial-gradient(ellipse 70% 60% at 92% 92%, rgba(120, 190, 255, 0.45), transparent 62%),
+      linear-gradient(180deg, #f7eaff 0%, #fde2ea 100%);
+    --color-bg: #fde2ea;
+    --color-ink: #0a0a0a;
+    --color-muted: #6b6b6b;
+    --color-line: #e6e6e6;
+    --color-soft: #f4f4f2;
+    --color-accent: #FF6B47;
+    --color-dark: #0d0d0d;
+    --hero-bg: radial-gradient(125% 125% at 50% 10%, #000 40%, #63e 100%);
+    --serif: 'Cormorant Garamond', Georgia, serif;
+    --sans: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 24px;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    font-family: var(--sans);
+    color: var(--color-ink);
+    background-color: var(--color-bg);
+    background-image: var(--surface-gradient);
+    background-attachment: fixed;
+    line-height: 1.6;
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: clip;
+  }
+
+  ::selection { background: var(--color-accent); color: #fff; }
+
+  /* ---------- Layout helpers (mobile-first) ---------- */
+  .container {
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto;
+    padding-left: max(1.125rem, env(safe-area-inset-left));
+    padding-right: max(1.125rem, env(safe-area-inset-right));
+  }
+
+  /* Mínimo ~48px entre bloques en móvil; un poco más en pantallas altas */
+  section { padding: 3rem 0 3.25rem; }
+
+  /* ---------- Tipografía editorial ---------- */
+  .display {
+    font-family: var(--serif);
+    font-weight: 500;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+  }
+
+  .eyebrow {
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .lede {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(1.125rem, 4.2vw, 1.375rem);
+    line-height: 1.45;
+    color: rgba(255,255,255,0.78);
+  }
+
+  /* ---------- Keyframes (respetados abajo en prefers-reduced-motion) ---------- */
+  @keyframes scroll-hint {
+    0%, 100% { transform: translateY(0); opacity: 0.85; }
+    50% { transform: translateY(6px); opacity: 1; }
+  }
+  @keyframes hero-glow {
+    0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.55; }
+    40% { transform: translate(4%, 6%) scale(1.06); opacity: 0.85; }
+    70% { transform: translate(-3%, 3%) scale(0.98); opacity: 0.65; }
+  }
+  @keyframes tip-pulse {
+    0%, 100% { transform: scale(1); filter: drop-shadow(0 0 0 transparent); }
+    50% { transform: scale(1.08); filter: drop-shadow(0 6px 14px rgba(255, 107, 71, 0.35)); }
+  }
+  @keyframes badge-shine {
+    from { opacity: 0; transform: translateX(-100%); }
+    to { opacity: 0.35; transform: translateX(100%); }
+  }
+
+  /* ---------- Animación al scroll ---------- */
+  .reveal {
+    opacity: 0;
+    transform: translateY(1.75rem) scale(0.985);
+    transition:
+      opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity, transform;
+  }
+  .reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal { opacity: 1; transform: none; transition: none; }
+    html { scroll-behavior: auto; }
+    body { background-attachment: scroll; }
+    .hero-scroll-arrow,
+    .hero::before,
+    .hero-badge::after,
+    .tip .icon { animation: none !important; }
+  }
+
+  /* ---------- HERO ---------- */
+  .hero {
+    background: var(--hero-bg);
+    color: #fff;
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    padding: max(5rem, calc(env(safe-area-inset-top) + 3rem)) 0 5.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: "";
+    position: absolute;
+    inset: -25%;
+    background: radial-gradient(ellipse 55% 45% at 28% 18%, rgba(255, 107, 71, 0.22), transparent 55%);
+    pointer-events: none;
+    animation: hero-glow 14s ease-in-out infinite;
+  }
+
+  .hero .container {
+    text-align: left;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 999px;
+    color: #fff;
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(6px);
+    margin-bottom: 32px;
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    transition: border-color 0.35s ease, background 0.35s ease;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .hero-badge:hover {
+      border-color: rgba(255,255,255,0.42);
+      background: rgba(255,255,255,0.08);
+    }
+  }
+  .hero-badge::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.12) 50%, transparent 60%);
+    animation: badge-shine 4.5s ease-in-out infinite;
+    pointer-events: none;
+  }
+  .hero-badge::before {
+    content: "";
+    flex-shrink: 0;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    box-shadow: 0 0 0 4px rgba(255,107,71,0.18);
+  }
+
+  .hero .hero-headline {
+    font-size: clamp(40px, 11vw, 56px);
+    color: #fff;
+    margin-bottom: 28px;
+    font-family: var(--serif);
+    font-weight: 500;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+  }
+  .hero .hero-headline .accent {
+    color: var(--color-accent);
+    font-style: italic;
+    font-weight: 600;
+  }
+
+  .hero p {
+    max-width: 560px;
+  }
+
+  .hero-scroll {
+    position: absolute;
+    bottom: max(1.25rem, env(safe-area-inset-bottom));
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255,255,255,0.6);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    text-align: center;
+    max-width: calc(100% - 2rem);
+    line-height: 1.4;
+  }
+  .hero-scroll-arrow {
+    display: inline-block;
+    margin-left: 2px;
+    animation: scroll-hint 1.65s ease-in-out infinite;
+  }
+
+  /* ---------- SECCIÓN: PROBLEMA ---------- */
+  .problem .section-head {
+    margin-bottom: 40px;
+  }
+  .problem h2 {
+    font-size: clamp(32px, 8vw, 44px);
+    margin-top: 12px;
+  }
+
+  .compare {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .card {
+    padding: 1.375rem 1.125rem;
+    border-radius: 6px;
+    position: relative;
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 18px 36px -20px rgba(0, 0, 0, 0.2);
+    }
+    .card.good:hover { box-shadow: 0 20px 40px -18px rgba(255, 107, 71, 0.25); }
+  }
+  .card:active { transform: scale(0.99); }
+  .card .card-tag {
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card .prompt-text {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: clamp(1.125rem, 4.2vw, 1.375rem);
+    line-height: 1.38;
+    margin-bottom: 16px;
+    word-break: break-word;
+  }
+  .card .arrow {
+    color: var(--color-muted);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .card .result {
+    color: var(--color-muted);
+    font-size: 15px;
+    line-height: 1.55;
+  }
+
+  .card.bad {
+    background: var(--color-soft);
+    color: #2b2b2b;
+  }
+  .card.bad .card-tag { color: #8a8a8a; }
+
+  .card.good {
+    background: #fff;
+    border: 1.5px solid var(--color-accent);
+    color: var(--color-ink);
+  }
+  .card.good .card-tag { color: var(--color-accent); }
+  .card.good::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: 4px;
+    pointer-events: none;
+  }
+
+  .closing-line {
+    margin-top: 40px;
+    text-align: center;
+    font-family: var(--serif);
+    font-size: clamp(22px, 5vw, 28px);
+    font-style: italic;
+    color: var(--color-ink);
+    line-height: 1.35;
+  }
+  .closing-line strong {
+    font-style: normal;
+    font-weight: 600;
+    background-image: linear-gradient(transparent 60%, rgba(255,107,71,0.28) 60%);
+    padding: 0 4px;
+  }
+
+  /* ---------- SECCIÓN: LAS 4 PARTES ---------- */
+  .parts h2 {
+    font-size: clamp(32px, 8vw, 44px);
+    margin-top: 12px;
+    margin-bottom: 8px;
+  }
+  .parts .intro-line {
+    color: var(--color-muted);
+    margin-bottom: 48px;
+    max-width: 520px;
+  }
+
+  .part {
+    display: grid;
+    grid-template-columns: minmax(2.75rem, auto) minmax(0, 1fr);
+    gap: 0.875rem 1rem;
+    padding: 1.5rem 0;
+    border-top: 1px solid var(--color-line);
+    align-items: start;
+  }
+  .part:last-child { border-bottom: 1px solid var(--color-line); }
+
+  .part .num {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 500;
+    font-size: clamp(2.5rem, 12vw, 4rem);
+    line-height: 0.88;
+    color: var(--color-ink);
+  }
+
+  .part h3 {
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .part p {
+    font-family: var(--serif);
+    font-size: clamp(1.125rem, 3.8vw, 1.375rem);
+    line-height: 1.42;
+    color: #2b2b2b;
+    word-break: break-word;
+  }
+
+  .part.featured {
+    background: var(--color-ink);
+    color: #fff;
+    margin: 1.5rem calc(-1 * max(1.125rem, env(safe-area-inset-left))) 0 calc(-1 * max(1.125rem, env(safe-area-inset-right)));
+    padding: 2rem max(1.125rem, env(safe-area-inset-left)) 2rem max(1.125rem, env(safe-area-inset-right));
+    border: none;
+    border-radius: 4px;
+    position: relative;
+  }
+  .part.featured + .part { border-top: none; }
+  .part.featured .num { color: var(--color-accent); }
+  .part.featured p { color: rgba(255,255,255,0.88); }
+  .part.featured .badge-most {
+    position: absolute;
+    top: -12px;
+    right: 16px;
+    background: var(--color-accent);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 6px 10px;
+    border-radius: 999px;
+  }
+
+  /* ---------- SECCIÓN: EJEMPLO REAL ---------- */
+  .example h2 {
+    font-size: clamp(32px, 8vw, 44px);
+    margin-top: 12px;
+    margin-bottom: 32px;
+  }
+
+  .terminal {
+    background: var(--color-dark);
+    color: #ededed;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 24px 60px -20px rgba(0,0,0,0.35);
+    max-width: 100%;
+  }
+  .terminal-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 14px;
+    background: #181818;
+    border-bottom: 1px solid #222;
+  }
+  .terminal-bar span {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: #3a3a3a;
+  }
+  .terminal-bar span:nth-child(1) { background: #ff5f57; }
+  .terminal-bar span:nth-child(2) { background: #febc2e; }
+  .terminal-bar span:nth-child(3) { background: #28c840; }
+  .terminal-bar .label {
+    margin-left: 12px;
+    width: auto; height: auto; border-radius: 0;
+    background: transparent;
+    color: #6b6b6b;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-family: var(--sans);
+  }
+
+  .terminal-body {
+    padding: 1rem 0.875rem;
+    font-family: 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace;
+    font-size: clamp(12px, 2.85vw, 14px);
+    line-height: 1.62;
+    color: #ededed;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    word-break: break-word;
+  }
+  .terminal-body p { margin-bottom: 14px; }
+  .terminal-body p:last-child { margin-bottom: 0; }
+  .terminal-body .ph {
+    color: var(--color-accent);
+  }
+  .terminal-body .prompt-marker {
+    color: var(--color-accent);
+    margin-right: 8px;
+  }
+
+  .mapping {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-top: 28px;
+  }
+  .map-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 10px;
+    padding: 0.75rem 0.875rem;
+    background: rgba(244, 244, 242, 0.92);
+    border-left: 3px solid var(--color-accent);
+    border-radius: 4px;
+    font-size: clamp(12px, 3.1vw, 13px);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .map-item:hover {
+      transform: translateX(2px);
+      box-shadow: 0 8px 20px -12px rgba(0, 0, 0, 0.12);
+    }
+  }
+  .map-item .pn {
+    font-weight: 700;
+    color: var(--color-ink);
+    flex: 0 0 auto;
+  }
+  .map-item .arrow {
+    color: var(--color-accent);
+    font-weight: 700;
+  }
+  .map-item .meaning {
+    color: var(--color-muted);
+  }
+
+  /* ---------- SECCIÓN: TIP BONUS ---------- */
+  .tip {
+    background: var(--hero-bg);
+    color: #fff;
+    text-align: center;
+  }
+  .tip .icon {
+    font-size: 48px;
+    line-height: 1;
+    margin-bottom: 24px;
+    display: inline-block;
+    animation: tip-pulse 2.8s ease-in-out infinite;
+  }
+  .tip .eyebrow {
+    color: var(--color-accent);
+    margin-bottom: 16px;
+    display: inline-block;
+  }
+  .tip p {
+    font-family: var(--serif);
+    font-size: clamp(22px, 5.5vw, 30px);
+    line-height: 1.4;
+    color: #fff;
+    max-width: 620px;
+    margin: 0 auto;
+  }
+  .tip code {
+    font-family: 'SFMono-Regular', Menlo, Consolas, monospace;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.18);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.78em;
+    color: var(--color-accent);
+    font-style: normal;
+  }
+
+  /* ---------- FOOTER ---------- */
+  footer {
+    background: #000;
+    color: #8a8a8a;
+    padding: 3rem 0 max(3rem, env(safe-area-inset-bottom));
+    text-align: center;
+  }
+  footer .mark {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 22px;
+    color: #fff;
+    margin-bottom: 8px;
+    display: block;
+  }
+  footer .mark .dot {
+    display: inline-block;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--color-accent);
+    margin-left: 4px;
+    vertical-align: middle;
+  }
+  footer p { font-size: 13px; }
+
+  /* ---------- GUÍA: apuntes ---------- */
+  .guide-intro {
+    background: transparent;
+    border-bottom: 1px solid rgba(10, 10, 10, 0.08);
+  }
+  .guide-intro .guide-title {
+    font-family: var(--serif);
+    font-size: clamp(36px, 9vw, 52px);
+    font-weight: 500;
+    line-height: 1.1;
+    margin-bottom: 12px;
+  }
+  .guide-intro .guide-tag {
+    font-family: var(--sans);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--color-accent);
+    margin-bottom: 28px;
+  }
+  .guide-intro .pullquote {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: clamp(20px, 4.5vw, 26px);
+    line-height: 1.45;
+    color: #2b2b2b;
+    padding: 24px 0 24px 20px;
+    border-left: 3px solid var(--color-accent);
+    margin-bottom: 40px;
+  }
+  .guide-intro .toc-title {
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    color: var(--color-ink);
+  }
+  .guide-intro .toc-list {
+    list-style: none;
+    counter-reset: toc;
+  }
+  .guide-intro .toc-list li {
+    counter-increment: toc;
+    border-top: 1px solid var(--color-line);
+  }
+  .guide-intro .toc-list a {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-height: 48px;
+    padding: 10px 4px 10px 0;
+    text-decoration: none;
+    color: var(--color-ink);
+    font-size: clamp(15px, 3.8vw, 17px);
+    transition: color 0.25s ease, transform 0.25s ease;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  .guide-intro .toc-list a:active {
+    transform: scale(0.98);
+  }
+  .guide-intro .toc-list a::before {
+    content: counter(toc, decimal-leading-zero);
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 22px;
+    color: var(--color-muted);
+    min-width: 2ch;
+  }
+  .guide-intro .toc-list a:hover { color: var(--color-accent); }
+
+  .guide {
+    background: transparent;
+  }
+  .guide .chapter-head {
+    margin-bottom: 32px;
+  }
+  .guide h2.chapter-title {
+    font-family: var(--serif);
+    font-size: clamp(30px, 7vw, 40px);
+    font-weight: 500;
+    line-height: 1.15;
+    margin-top: 10px;
+  }
+  .guide .prose {
+    font-size: 16px;
+    line-height: 1.65;
+    color: #2b2b2b;
+    max-width: 640px;
+  }
+  .guide .prose p { margin-bottom: 18px; }
+  .guide .prose p:last-child { margin-bottom: 0; }
+  .guide .prose strong { font-weight: 700; color: var(--color-ink); }
+  .guide .prose .lead-in {
+    font-family: var(--serif);
+    font-size: 22px;
+    font-style: italic;
+    color: #2b2b2b;
+    margin-bottom: 20px;
+  }
+
+  .callout {
+    margin: 28px 0;
+    padding: 20px 20px 20px 22px;
+    background: var(--color-soft);
+    border-left: 3px solid var(--color-accent);
+    border-radius: 2px;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 19px;
+    line-height: 1.45;
+    color: #2b2b2b;
+  }
+  .callout .callout-icon {
+    font-style: normal;
+    margin-right: 6px;
+  }
+
+  .aside-warn {
+    margin: 28px 0;
+    padding: 20px 22px;
+    background: var(--color-ink);
+    color: #fff;
+    border-radius: 4px;
+    font-size: 15px;
+    line-height: 1.55;
+  }
+  .aside-warn strong {
+    color: var(--color-accent);
+    font-weight: 700;
+  }
+
+  .scroll-table {
+    margin: 28px 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid var(--color-line);
+    border-radius: 4px;
+  }
+  .scroll-table table {
+    width: 100%;
+    min-width: 520px;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  .scroll-table th,
+  .scroll-table td {
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--color-line);
+    vertical-align: top;
+  }
+  .scroll-table th {
+    font-family: var(--sans);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 700;
+    background: var(--color-soft);
+    color: var(--color-ink);
+  }
+  .scroll-table tr:last-child td { border-bottom: none; }
+  .scroll-table td { color: var(--color-muted); }
+  .scroll-table td strong { color: var(--color-ink); }
+
+  .term-block {
+    margin: 36px 0;
+    padding-top: 28px;
+    border-top: 1px solid var(--color-line);
+  }
+  .term-block:first-of-type { border-top: none; padding-top: 0; }
+  .term-block h3 {
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    color: var(--color-accent);
+  }
+  .term-block .term-name {
+    font-family: var(--serif);
+    font-size: 26px;
+    font-weight: 500;
+    margin-bottom: 12px;
+    line-height: 1.2;
+  }
+  .term-block .term-name .emoji { font-style: normal; margin-right: 8px; }
+
+  .split-compare {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+    margin: 28px 0;
+    border: 1px solid var(--color-line);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .split-compare .col {
+    padding: 22px 20px;
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(8px);
+  }
+  .split-compare .col + .col {
+    border-top: 1px solid var(--color-line);
+    background: rgba(244, 244, 242, 0.88);
+    backdrop-filter: blur(8px);
+  }
+  .split-compare .col h4 {
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    color: var(--color-muted);
+  }
+  .split-compare .col:last-child h4 { color: var(--color-accent); }
+  .split-compare ul {
+    list-style: none;
+    font-size: 15px;
+    line-height: 1.6;
+    color: #2b2b2b;
+  }
+  .split-compare li { padding: 6px 0; padding-left: 22px; position: relative; }
+  .split-compare li::before {
+    content: "·";
+    position: absolute;
+    left: 0;
+    color: var(--color-accent);
+    font-weight: 700;
+  }
+
+  .checklist {
+    list-style: none;
+    margin-top: 8px;
+  }
+  .checklist li {
+    padding: 14px 0 14px 36px;
+    border-bottom: 1px solid var(--color-line);
+    position: relative;
+    font-size: 15px;
+    line-height: 1.55;
+    color: #2b2b2b;
+  }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist li::before {
+    content: "✏️";
+    position: absolute;
+    left: 0;
+    top: 14px;
+    font-size: 16px;
+  }
+
+  .quote-block {
+    margin: 32px 0;
+    padding: 28px 24px;
+    background: var(--color-soft);
+    border-radius: 4px;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: clamp(20px, 4vw, 24px);
+    line-height: 1.45;
+    text-align: center;
+    color: #2b2b2b;
+  }
+
+  .guide hr.divider {
+    border: none;
+    height: 1px;
+    background: var(--color-line);
+    margin: 48px 0;
+  }
+
+  .guide code {
+    font-family: 'SFMono-Regular', Menlo, Consolas, monospace;
+    font-size: 0.88em;
+    background: rgba(0,0,0,0.06);
+    padding: 2px 7px;
+    border-radius: 3px;
+    font-style: normal;
+  }
+  .aside-warn code { background: rgba(255,255,255,0.12); color: #fff; }
+
+  section[id^="ap-"] { scroll-margin-top: max(1rem, env(safe-area-inset-top)); }
+
+  .scroll-table {
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+  }
+
+  @media (max-width: 767px) {
+    body { background-attachment: scroll; }
+
+    .scroll-table th,
+    .scroll-table td {
+      padding: 0.65rem 0.75rem;
+      font-size: 13px;
+    }
+    .scroll-table table { min-width: 480px; }
+    .guide .prose { font-size: 15px; }
+    .guide .prose .lead-in { font-size: clamp(1.125rem, 4vw, 1.25rem); }
+    .callout { font-size: clamp(1rem, 3.6vw, 1.125rem); padding: 1rem 1rem 1rem 1.125rem; }
+    .term-block .term-name { font-size: clamp(1.25rem, 5.5vw, 1.5rem); }
+    .checklist li { font-size: 14px; padding-top: 12px; padding-bottom: 12px; }
+    .problem h2,
+    .parts h2,
+    .example h2 { font-size: clamp(1.625rem, 7vw, 2.25rem); }
+    .part.featured .badge-most {
+      right: max(0.75rem, env(safe-area-inset-right));
+      font-size: 9px;
+      padding: 5px 8px;
+    }
+  }
+
+  /* ---------- DESKTOP (>= 768px) ---------- */
+  @media (min-width: 768px) {
+    .container { max-width: 880px; padding: 0 40px; }
+    section { padding: 120px 0; }
+
+    .hero { padding: 120px 0; min-height: 100vh; }
+    .hero .hero-headline { font-size: clamp(64px, 7vw, 96px); max-width: 900px; }
+    .hero p.lede { font-size: 24px; max-width: 600px; }
+
+    .compare { grid-template-columns: 1fr 1fr; gap: 28px; }
+    .card { padding: 36px 32px; }
+    .card .prompt-text { font-size: 26px; }
+
+    .part { grid-template-columns: 120px 1fr; gap: 32px; padding: 44px 0; }
+    .part .num { font-size: 96px; }
+    .part h3 { font-size: 14px; }
+    .part p { font-size: 26px; }
+
+    .part.featured { margin: 32px 0 0; padding: 48px 40px; }
+    .part.featured .badge-most { top: -14px; right: 32px; }
+
+    .terminal-body { padding: 32px 28px; font-size: 15px; }
+
+    .mapping { grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .closing-line { margin-top: 56px; }
+
+    .split-compare { grid-template-columns: 1fr 1fr; }
+    .split-compare .col + .col { border-top: none; border-left: 1px solid var(--color-line); }
+  }
+
+  @media (min-width: 1024px) {
+    .container { max-width: 960px; }
+    .hero .hero-headline { font-size: 104px; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ============ HERO ============ -->
+  <section class="hero">
+    <div class="container">
+      <span class="hero-badge eyebrow reveal">La fórmula que nadie te enseñó</span>
+      <p class="hero-headline display reveal">El prompt que sí funciona tiene <span class="accent">4 partes</span>. ¿Sabes cuáles?</p>
+      <p class="lede reveal">La mayoría escribe: "Hazme un guión viral". Y después se quejan de que la respuesta es genérica. El problema no es Claude — es el prompt.</p>
+    </div>
+    <div class="hero-scroll reveal">Sigue leyendo <span class="hero-scroll-arrow" aria-hidden="true">↓</span></div>
+  </section>
+
+  <!-- ============ GUÍA: INTRO + ÍNDICE ============ -->
+  <section class="guide-intro">
+    <div class="container">
+      <h1 class="guide-title reveal">Mis apuntes de Claude</h1>
+      <p class="guide-tag reveal">Todo lo que nadie te explica — en lenguaje normal</p>
+      <blockquote class="pullquote reveal">A ver, antes de empezar… Si escuchaste hablar de Claude y no entendiste nada — esta guía es para ti. Vamos de lo más básico a lo que ya sí cambia cómo trabajas. Sin tecnicismos. Solo lo que necesitas saber. 🚀</blockquote>
+      <p class="toc-title reveal">Lo que vas a aprender</p>
+      <ol class="toc-list reveal">
+        <li><a href="#ap-1">¿Qué es Claude?</a></li>
+        <li><a href="#ap-2">Los modelos de Claude</a></li>
+        <li><a href="#ap-3">¿Dónde usarlo?</a></li>
+        <li><a href="#ap-4">Palabras que necesitas conocer</a></li>
+        <li><a href="#ap-5">Claude Code</a></li>
+        <li><a href="#ap-6">Planes y precios</a></li>
+        <li><a href="#ap-7">El resumen que sí vas a recordar</a></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============ PROBLEMA ============ -->
+  <section class="problem">
+    <div class="container">
+      <div class="section-head reveal">
+        <span class="eyebrow">01 — El problema</span>
+        <h2 class="display">Mismo modelo. Resultados opuestos.</h2>
+      </div>
+
+      <div class="compare">
+        <article class="card bad reveal">
+          <div class="card-tag">✕ Prompt genérico</div>
+          <p class="prompt-text">"Hazme un guión viral."</p>
+          <div class="arrow">— Resultado</div>
+          <p class="result">Un texto plano, lleno de lugares comunes, que podría servir para cualquiera y no conecta con nadie. Suena a IA.</p>
+        </article>
+
+        <article class="card good reveal">
+          <div class="card-tag">✓ Prompt con estructura</div>
+          <p class="prompt-text">"Escribe un guión de 60s para mi audiencia de [nicho], con tono [x], sobre [tema], evitando [y]."</p>
+          <div class="arrow">— Resultado</div>
+          <p class="result">Una pieza específica, con tu voz, lista para grabar. Útil de verdad porque le diste contexto, intención y límites.</p>
+        </article>
+      </div>
+
+      <p class="closing-line reveal">La diferencia no es talento.<br/>Es <strong>estructura</strong>.</p>
+    </div>
+  </section>
+
+  <!-- ============ LAS 4 PARTES ============ -->
+  <section class="parts">
+    <div class="container">
+      <div class="reveal">
+        <span class="eyebrow">02 — La fórmula</span>
+        <h2 class="display">Las 4 partes de un prompt que funciona.</h2>
+        <p class="intro-line">Cada parte responde a una pregunta distinta. Si te falta una, la respuesta se cae.</p>
+      </div>
+
+      <div class="part reveal">
+        <div class="num">01</div>
+        <div>
+          <h3>Qué quieres que haga</h3>
+          <p>La tarea exacta, con verbo de acción. "Escribe", "crea", "investiga". No "ayúdame con".</p>
+        </div>
+      </div>
+
+      <div class="part reveal">
+        <div class="num">02</div>
+        <div>
+          <h3>Cómo lo quieres</h3>
+          <p>Tono, estilo, formato. ¿Casual o profesional? ¿Ideas sueltas o un reporte? ¿Corto o detallado?</p>
+        </div>
+      </div>
+
+      <div class="part reveal">
+        <div class="num">03</div>
+        <div>
+          <h3>Para qué lo quieres</h3>
+          <p>Tu objetivo final. Esto hace que Claude apunte a lo que de verdad necesitas, no a lo genérico.</p>
+        </div>
+      </div>
+
+      <div class="part featured reveal">
+        <span class="badge-most">El más importante</span>
+        <div class="num">04</div>
+        <div>
+          <h3>Lo que NO quieres</h3>
+          <p>Las restricciones concretas que evitan que Claude se desvíe. Esto es lo que hace que suene como tú.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ EJEMPLO REAL ============ -->
+  <section class="example">
+    <div class="container">
+      <div class="reveal">
+        <span class="eyebrow">03 — En la práctica</span>
+        <h2 class="display">Míralo en acción.</h2>
+      </div>
+
+      <div class="terminal reveal">
+        <div class="terminal-bar">
+          <span></span><span></span><span></span>
+          <span class="label">prompt.txt</span>
+        </div>
+        <div class="terminal-body">
+          <p><span class="prompt-marker">›</span>Necesito que investigues temas de contenido para mi cuenta de <span class="ph">[red social]</span> donde hablo sobre <span class="ph">[temas principales]</span>. Encuentra ideas enfocadas en puntos de dolor que la gente busca activamente.</p>
+          <p>Entrega las ideas en forma de lista clara: tema, por qué duele, y un ángulo de contenido. Que sea directo y accionable, sin relleno.</p>
+          <p>El objetivo es tener un banco de ideas para crear contenido que conecte de verdad con mi audiencia y me posicione como referente en <span class="ph">[nicho]</span>.</p>
+          <p>No investigues nada relacionado a <span class="ph">[lo que no va con tu marca]</span>.</p>
+        </div>
+      </div>
+
+      <div class="mapping">
+        <div class="map-item reveal">
+          <span class="pn">Párrafo 1</span>
+          <span class="arrow">→</span>
+          <span class="meaning">Qué quieres</span>
+        </div>
+        <div class="map-item reveal">
+          <span class="pn">Párrafo 2</span>
+          <span class="arrow">→</span>
+          <span class="meaning">Cómo lo quieres</span>
+        </div>
+        <div class="map-item reveal">
+          <span class="pn">Párrafo 3</span>
+          <span class="arrow">→</span>
+          <span class="meaning">Para qué</span>
+        </div>
+        <div class="map-item reveal">
+          <span class="pn">Párrafo 4</span>
+          <span class="arrow">→</span>
+          <span class="meaning">Lo que NO quieres</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TIP BONUS ============ -->
+  <section class="tip">
+    <div class="container">
+      <span class="icon reveal" aria-hidden="true">💡</span>
+      <div class="reveal">
+        <span class="eyebrow">Tip bonus</span>
+      </div>
+      <p class="reveal">Cuando Claude te dé una respuesta, escríbele: <code>"Audita tu plan"</code> — y él mismo encuentra errores en su propia respuesta y los mejora. Así de fácil.</p>
+    </div>
+  </section>
+
+  <!-- ============ GUÍA: CAPÍTULOS ============ -->
+  <section class="guide" id="ap-1">
+    <div class="container">
+      <div class="chapter-head reveal">
+        <span class="eyebrow">Apuntes — 1</span>
+        <h2 class="chapter-title">¿Qué es Claude?</h2>
+      </div>
+      <div class="prose reveal">
+        <p class="lead-in">A ver, empecemos por lo básico.</p>
+        <p><strong>Claude</strong> es un <strong>asistente de inteligencia artificial</strong> creado por una empresa que se llama Anthropic. Le escribes algo y él te responde. También puede ver imágenes y leer documentos que le mandes.</p>
+      </div>
+      <p class="callout reveal"><span class="callout-icon">💡</span>Piénsalo como un compañero de trabajo que leyó millones de libros, nunca se cansa y está disponible 24/7. Le escribes, él responde. Así de simple.</p>
+      <div class="prose reveal">
+        <p><strong>Anthropic</strong> es la empresa que creó a Claude. La fundaron Dario y Daniela Amodei en 2021. Su obsesión: hacer IA que sea <strong>segura y útil</strong> al mismo tiempo. Amazon, Google y Microsoft han metido miles de millones ahí — o sea, no es un juguete.</p>
+      </div>
+      <p class="callout reveal"><span class="callout-icon">💡</span>Si Claude fuera un carro, Anthropic es la fábrica. Y es una fábrica en la que las empresas más grandes del mundo ya apostaron.</p>
+      <div class="prose reveal">
+        <p><strong>Ojo con esto:</strong> Claude no piensa como tú. No tiene emociones. No recuerda tus conversaciones anteriores. Es una máquina muy sofisticada detectando patrones en el lenguaje. Increíblemente bien entrenada — pero máquina al final.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="guide" id="ap-2">
+    <div class="container">
+      <div class="chapter-head reveal">
+        <span class="eyebrow">Apuntes — 2</span>
+        <h2 class="chapter-title">Los modelos de Claude</h2>
+      </div>
+      <div class="prose reveal">
+        <p>Esto es simple. Claude no es uno solo — hay versiones. Como tener autos de diferente potencia.</p>
+      </div>
+      <div class="scroll-table reveal">
+        <table>
+          <thead>
+            <tr><th>Modelo</th><th>¿Para qué sirve?</th><th>Velocidad</th><th>Precio</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Opus</strong></td><td>Tareas muy complejas. El más inteligente.</td><td>🐢 Lento</td><td>💰💰💰</td></tr>
+            <tr><td><strong>Sonnet</strong></td><td>El equilibrado. Sirve para casi todo.</td><td>⚡ Rápido</td><td>💰💰</td></tr>
+            <tr><td><strong>Haiku</strong></td><td>Tareas simples. El más rápido.</td><td>🚀 Muy rápido</td><td>💰</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="callout reveal"><span class="callout-icon">💡</span>El 90% de las veces vas a querer Sonnet. No el más caro, no el más barato. El del medio. Es el que tiene el mejor balance entre inteligencia y velocidad.</p>
+    </div>
+  </section>
+
+  <section class="guide" id="ap-3">
+    <div class="container">
+      <div class="chapter-head reveal">
+        <span class="eyebrow">Apuntes — 3</span>
+        <h2 class="chapter-title">¿Dónde puedo usar Claude?</h2>
+      </div>
+      <div class="scroll-table reveal">
+        <table>
+          <thead>
+            <tr><th>Dónde</th><th>Para qué</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>🌐 Claude.ai</strong></td><td>La web oficial. Gratis para empezar. Entras, creas cuenta y ya estás dentro.</td></tr>
+            <tr><td><strong>📱 App móvil</strong></td><td>Disponible para tu celular. Lo mismo pero en tu mano.</td></tr>
+            <tr><td><strong>🔌 API</strong></td><td>Para programadores. Le metes Claude adentro de tus propias apps.</td></tr>
+            <tr><td><strong>💻 Claude Code</strong></td><td>Para automatizar. Y no, no necesitas saber programar. Te explico abajo.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="guide" id="ap-4">
+    <div class="container">
+      <div class="chapter-head reveal">
+        <span class="eyebrow">Apuntes — 4</span>
+        <h2 class="chapter-title">Palabras que necesitas conocer</h2>
+      </div>
+      <div class="prose reveal">
+        <p>A ver, aquí van los términos que vas a escuchar todo el tiempo. Apréndetelos y ya suenas como alguien que sabe.</p>
+      </div>
+
+      <div class="term-block reveal">
+        <h3>Vocabulario</h3>
+        <p class="term-name"><span class="emoji">💬</span>Prompt</p>
+        <div class="prose">
+          <p>Es lo que le escribes a Claude. La instrucción. La pregunta. La tarea. <strong>La calidad de la respuesta depende directamente de qué tan bien escribes el prompt.</strong> Literal. No es magia — es estructura.</p>
+        </div>
+        <p class="callout"><span class="callout-icon">💡</span>Piénsalo como pedir comida. Si dices "tráeme algo", te traen lo que sea. Si dices "quiero una hamburguesa con queso, sin cebolla, con papas fritas" — te traen exactamente eso. Claude funciona igual.</p>
+      </div>
+
+      <div class="term-block reveal">
+        <p class="term-name"><span class="emoji">🎭</span>System prompt</p>
+        <div class="prose">
+          <p>Instrucciones que le das a Claude <strong>antes</strong> de que empiece la conversación. El usuario no las ve. Definen quién es Claude en esa app o contexto — su personalidad, su tono, sus reglas.</p>
+        </div>
+        <p class="callout"><span class="callout-icon">💡</span>Es el "primer día de trabajo" de tu empleado. Ahí le explicas todo antes de que empiece a atender. Sin eso, Claude improvisa. Con eso, sigue tu sistema.</p>
+      </div>
+
+      <div class="term-block reveal">
+        <p class="term-name"><span class="emoji">🛠️</span>Prompt engineering</p>
+        <div class="prose">
+          <p>El arte de escribir instrucciones efectivas. No es programación — es comunicación. Aprender a hablarle a Claude para que te dé exactamente lo que necesitas.</p>
+        </div>
+        <p class="callout"><span class="callout-icon">💡</span>O sea, es aprender a hacer buenas preguntas. Un buen periodista saca mejores entrevistas que uno malo. Tú, con mejores prompts, sacas mejores resultados.</p>
+      </div>
+
+      <div class="term-block reveal">
+        <p class="term-name"><span class="emoji">💭</span>Chain of thought — cadena de pensamiento</p>
+        <div class="prose">
+          <p>Le pides a Claude que piense paso a paso antes de darte la respuesta. Suena obvio, pero hace una diferencia enorme en problemas complejos.</p>
+        </div>
+        <p class="callout"><span class="callout-icon">💡</span>Es decirle "muéstrame tu trabajo" como en el examen de matemáticas. Cuando te muestra el proceso, el resultado sale mejor. Siempre.</p>
+      </div>
+
+      <div class="term-block reveal">
+        <p class="term-name"><span class="emoji">🎨</span>Artifact (artefacto)</p>
+        <div class="prose">
+          <p>Una cosa que Claude crea en una ventana aparte del chat. No solo texto — puede ser código que funciona, una página web, una tabla, una mini-app. Lo puedes ver, editar y descargar.</p>
+        </div>
+        <p class="callout"><span class="callout-icon">💡</span>No te explica cómo hacer la tabla. Te hace la tabla. Ahí mismo. Lista para usar.</p>
+      </div>
+
+      <div class="term-block reveal">
+        <p class="term-name"><span class="emoji">🗂️</span>Proyecto (project)</p>
+        <div class="prose">
+          <p>En Claude.ai, una carpeta donde agrupas conversaciones relacionadas. Le das instrucciones fijas y subes documentos. Claude los usa en todas las conversaciones de ese proyecto — siempre con ese contexto.</p>
+        </div>
+        <p class="callout"><span class="callout-icon">💡</span>Como tener un asistente especializado para cada área de tu vida. El del negocio sabe de tu negocio. El del contenido sabe de tu contenido. No le tienes que repetir nada.</p>
+      </div>
+
+      <div class="term-block reveal">
+        <p class="term-name"><span class="emoji">📅</span>Fecha de corte — knowledge cutoff</p>
+        <div class="prose">
+          <p>Claude sabe lo que pasó hasta agosto de 2025. Punto. Lo que pasó después no lo sabe — a menos que tú se lo cuentes o que tenga acceso a búsqueda web.</p>
+        </div>
+        <p class="callout"><span class="callout-icon">💡</span>Imagínate alguien que estuvo sin internet desde agosto de 2025. Sabe todo lo de antes. Pero lo de después lo tiene que aprender de ti.</p>
+      </div>
+
+      <aside class="aside-warn reveal"><strong>🔥 El error más común:</strong> pedirle a Claude información reciente sin avisarle que no la tiene. Siempre dale contexto de lo actual si lo necesitas.</aside>
+    </div>
+  </section>
+
+  <section class="guide" id="ap-5">
+    <div class="container">
+      <div class="chapter-head reveal">
+        <span class="eyebrow">Apuntes — 5</span>
+        <h2 class="chapter-title">Claude Code — el que sí hace el trabajo</h2>
+      </div>
+      <div class="prose reveal">
+        <p>🌱 Esto no es solo para programadores. Cualquier persona con un negocio o proyecto puede usar esto para automatizar cosas. Sigue leyendo.</p>
+        <p>El problema con Claude normal — el que usas en el chat — es que te <strong>dice</strong> cómo hacer algo. Claude Code lo <strong>hace</strong> él.</p>
+      </div>
+      <div class="scroll-table reveal">
+        <table>
+          <thead>
+            <tr><th>Claude chat normal</th><th>Claude Code</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Te <em>dice</em> cómo hacerlo</td><td>Lo <em>hace</em> por ti ✅</td></tr>
+            <tr><td>No ve tus archivos</td><td>Ve y edita todos tus archivos ✅</td></tr>
+            <tr><td>No puede correr nada</td><td>Corre comandos solo ✅</td></tr>
+            <tr><td>Tú haces el trabajo manual</td><td>Él hace el trabajo manual ✅</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="callout reveal"><span class="callout-icon">💡</span>Claude chat es como un amigo que te manda la receta por WhatsApp. Claude Code es el chef que llega a tu cocina y cocina él. Misma información, resultado completamente diferente.</p>
+
+      <hr class="divider" />
+
+      <div class="chapter-head reveal">
+        <span class="eyebrow">Dentro de Claude Code</span>
+        <h2 class="chapter-title">CLAUDE.md — las instrucciones de tu asistente</h2>
+      </div>
+      <div class="prose reveal">
+        <p><strong>CLAUDE.md</strong> es un archivo de texto simple que Claude Code lee <strong>cada vez que lo abres</strong>. Ahí le dices quién es, cómo habla, cómo organiza su trabajo y qué no puede hacer. Es su memoria de largo plazo.</p>
+      </div>
+      <p class="callout reveal"><span class="callout-icon">💡</span>El primer día de trabajo de un empleado. Sin CLAUDE.md, Claude improvisa. Con él, sigue tu sistema — siempre, desde el primer mensaje.</p>
+      <div class="prose reveal">
+        <p><strong>¿Qué le pones adentro?</strong></p>
+        <p>✏️ <strong>¿Quién es?</strong> → "Eres mi asistente de contenido para Instagram…"</p>
+        <p>✏️ <strong>¿Cómo habla?</strong> → Tono, estilo, qué palabras usa y cuáles no</p>
+        <p>✏️ <strong>¿Cómo organiza el trabajo?</strong> → Cómo nombra archivos, dónde guarda cosas</p>
+        <p>✏️ <strong>¿Qué no hace?</strong> → Sus límites claros</p>
+      </div>
+      <p class="callout reveal"><span class="callout-icon">💡</span>Truco: escribe <code>/init</code> en el chat y Claude crea su propio CLAUDE.md leyendo tu proyecto. Él lo genera solo. Después tú lo ajustas.</p>
+
+      <hr class="divider" />
+
+      <div class="chapter-head reveal">
+        <span class="eyebrow">Dentro de Claude Code</span>
+        <h2 class="chapter-title">Skills — lo que le enseñas a hacer</h2>
+      </div>
+      <div class="prose reveal">
+        <p><strong>Skill (habilidad):</strong> instrucciones muy detalladas para una tarea específica. Le enseñas a Claude exactamente cómo hacer algo — paso a paso, siempre igual, con tu criterio. Se activan con un comando que empieza con <strong>/</strong>.</p>
+      </div>
+      <p class="callout reveal"><span class="callout-icon">💡</span>Si puedes enseñarle a un empleado cómo hacer algo, puedes enseñárselo a Claude con una skill. Lo entrenas una vez. Lo usas mil veces.</p>
+      <div class="scroll-table reveal">
+        <table>
+          <thead>
+            <tr><th>Skill</th><th>Para qué</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>✍️ Tu voz de marca</td><td>Escribe contenido que suene exactamente como tú — siempre.</td></tr>
+            <tr><td>📊 Reporte de campaña</td><td>Saca los datos y genera el reporte completo. Solo.</td></tr>
+            <tr><td>🎨 Ideas de thumbnails</td><td>Genera conceptos visuales para tus videos en segundos.</td></tr>
+            <tr><td>🔄 Repropósito de contenido</td><td>Un video → posts + hilos + newsletter. Automático.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <hr class="divider" />
+
+      <div class="chapter-head reveal">
+        <span class="eyebrow">Dentro de Claude Code</span>
+        <h2 class="chapter-title">MCP — la conexión con el mundo real</h2>
+      </div>
+      <div class="prose reveal">
+        <p><strong>MCP — Model Context Protocol</strong> es lo que conecta a Claude con tus herramientas reales. Sin MCP, Claude trabaja solo con lo que está en tu computador. Con MCP, puede entrar a Google Drive, leer tus emails, revisar tu Analytics, publicar en Slack.</p>
+      </div>
+      <p class="callout reveal"><span class="callout-icon">💡</span>Es darle las llaves de tu operación. Sin MCP solo puede hablar contigo. Con MCP puede trabajar en tu operación.</p>
+      <div class="split-compare reveal">
+        <div class="col">
+          <h4>Sin MCP 😮‍💨</h4>
+          <ul>
+            <li>Tú → Analytics → copias datos → los pegas a Claude → él analiza → copias respuesta → la pegas en Slack. Tú hiciste todo el trabajo manual.</li>
+          </ul>
+        </div>
+        <div class="col">
+          <h4>Con MCP ✅</h4>
+          <ul>
+            <li>Le dices: "Revisa mis analytics y publica el resumen en Slack." Claude lo hace todo. Tú no tocaste nada.</li>
+          </ul>
+        </div>
+      </div>
+
+      <hr class="divider" />
+
+      <div class="chapter-head reveal">
+        <span class="eyebrow">Dentro de Claude Code</span>
+        <h2 class="chapter-title">Agentes — tu equipo trabajando mientras tú no estás</h2>
+      </div>
+      <div class="term-block reveal">
+        <p class="term-name"><span class="emoji">🤖</span>Agente (agent)</p>
+        <div class="prose">
+          <p>Un sistema de IA que actúa solo hasta terminar una tarea. No solo responde — planifica pasos, toma decisiones, ejecuta acciones. Le das una meta y él trabaja hasta cumplirla.</p>
+        </div>
+        <p class="callout"><span class="callout-icon">💡</span>Un chatbot responde preguntas. Un agente recibe una meta — "organiza todas mis facturas del mes" — y trabaja solo hasta terminar. Sin que le expliques cada paso.</p>
+      </div>
+      <div class="term-block reveal">
+        <p class="term-name"><span class="emoji">🔀</span>Subagente</p>
+        <div class="prose">
+          <p>Claude puede crear agentes secundarios para hacer varias cosas al mismo tiempo. Tu Claude principal delega partes de la tarea a varios subagentes que trabajan en paralelo.</p>
+        </div>
+        <p class="callout"><span class="callout-icon">💡</span>Necesitas revisar 20 competidores en Instagram. Claude lanza 20 subagentes al mismo tiempo, cada uno con uno. En minutos tienes el análisis completo.</p>
+      </div>
+      <div class="term-block reveal">
+        <p class="term-name"><span class="emoji">👁️</span>Headless mode</p>
+        <div class="prose">
+          <p>Claude Code corriendo solo, sin que tú estés mirando. Puedes programar tareas automáticas — todos los días, a la hora que quieras — mientras duermes.</p>
+        </div>
+        <p class="callout"><span class="callout-icon">💡</span>Lo configuras a las 10pm. Duermes. A las 6am el trabajo ya está hecho. Eso es un empleado digital de verdad.</p>
+      </div>
+
+      <hr class="divider" />
+
+      <div class="chapter-head reveal">
+        <span class="eyebrow">Cómo se conecta todo</span>
+        <h2 class="chapter-title">Las piezas en una sola mesa</h2>
+      </div>
+      <div class="scroll-table reveal">
+        <table>
+          <thead>
+            <tr><th>Pieza</th><th>Qué hace</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>📄 CLAUDE.md</strong></td><td>Define quién es Claude y cómo habla</td></tr>
+            <tr><td><strong>🎯 Skills</strong></td><td>Le enseñas qué hacer y cómo hacerlo</td></tr>
+            <tr><td><strong>🔌 MCP</strong></td><td>Lo conectas con tus herramientas reales</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="quote-block reveal">"Escribe el reporte de campaña en mi voz, saca los datos de Analytics y publica los highlights en Slack"</p>
+      <div class="prose reveal">
+        <p>Y aquí es donde todo cambia. Con los tres juntos, le dices una sola cosa como la de arriba — Claude lo hace todo solo. En minutos. Sin que muevas un dedo. 🤯</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="guide" id="ap-6">
+    <div class="container">
+      <div class="chapter-head reveal">
+        <span class="eyebrow">Apuntes — 6</span>
+        <h2 class="chapter-title">Planes y precios</h2>
+      </div>
+      <div class="prose reveal">
+        <p>Esto es simple. No te compliques.</p>
+      </div>
+      <div class="scroll-table reveal">
+        <table>
+          <thead>
+            <tr><th>Plan</th><th>Precio</th><th>¿Para quién?</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Free</strong></td><td>Gratis</td><td>Para probar. Tiene límites diarios.</td></tr>
+            <tr><td><strong>Pro</strong></td><td>$20/mes</td><td>Si lo usas seguido. 5x más que el gratis.</td></tr>
+            <tr><td><strong>Max 5x</strong></td><td>$100/mes</td><td>Si vives en Claude. Casi ilimitado.</td></tr>
+            <tr><td><strong>Max 20x</strong></td><td>$200/mes</td><td>Uso muy intensivo. Para profesionales.</td></tr>
+            <tr><td><strong>Team</strong></td><td>$25/persona/mes</td><td>Para equipos.</td></tr>
+            <tr><td><strong>API</strong></td><td>Pago por uso</td><td>Para programadores. Pagas lo que consumes.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="prose reveal">
+        <p><strong>Mi recomendación:</strong> empieza con Free o Pro. Úsalo, siente cuánto consumes, y después decides si necesitas más. El problema no es el plan — el problema es no usarlo.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="guide" id="ap-7">
+    <div class="container">
+      <div class="chapter-head reveal">
+        <span class="eyebrow">Apuntes — 7</span>
+        <h2 class="chapter-title">El resumen que sí vas a recordar</h2>
+      </div>
+      <ul class="checklist reveal">
+        <li><strong>Claude</strong> = asistente de IA de Anthropic. Le escribes, él responde.</li>
+        <li><strong>LLM</strong> = la tecnología. Detecta patrones en el lenguaje, no "piensa".</li>
+        <li><strong>Token</strong> = pieza mínima de texto. Todo se mide en tokens.</li>
+        <li><strong>Prompt</strong> = lo que le escribo. Mejor prompt, mejor respuesta. Siempre.</li>
+        <li><strong>System prompt</strong> = las reglas que le das antes de que empiece.</li>
+        <li><strong>Ventana de contexto</strong> = su memoria en la conversación. Tiene límite.</li>
+        <li><strong>Alucinación</strong> = cuando inventa cosas con confianza. Siempre verifica.</li>
+        <li><strong>Claude Code</strong> = no te dice cómo — lo hace por ti.</li>
+        <li><strong>CLAUDE.md</strong> = el manual de instrucciones de tu asistente.</li>
+        <li><strong>Skills</strong> = le enseñas cómo hacer algo una vez, lo repite mil.</li>
+        <li><strong>MCP</strong> = lo conectas con Gmail, Drive, Slack, Analytics…</li>
+        <li><strong>Agente</strong> = Claude que trabaja solo hasta terminar una tarea.</li>
+        <li><strong>Subagente</strong> = varios Claude haciendo cosas en paralelo al mismo tiempo.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <footer>
+    <div class="container">
+      <span class="mark">Prompt<span class="dot"></span></span>
+      <p>Aprende a usar IA de verdad.</p>
+    </div>
+  </footer>
+
+<script>
+  (function () {
+    if (!('IntersectionObserver' in window)) {
+      document.querySelectorAll('.reveal').forEach(function (el) {
+        el.classList.add('is-visible');
+      });
+      return;
+    }
+
+    var narrow = typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 767px)').matches;
+    var rootMargin = narrow ? '0px 0px -12% 0px' : '0px 0px -8% 0px';
+    var threshold = narrow ? 0.06 : 0.12;
+
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          var el = entry.target;
+          var delay = parseInt(el.dataset.delay || '0', 10);
+          setTimeout(function () { el.classList.add('is-visible'); }, delay);
+          observer.unobserve(el);
+        }
+      });
+    }, {
+      threshold: threshold,
+      rootMargin: rootMargin
+    });
+
+    var items = document.querySelectorAll('.reveal');
+    items.forEach(function (el) {
+      var parent = el.parentElement;
+      var siblings = parent ? parent.querySelectorAll(':scope > .reveal') : [];
+      if (siblings.length > 1) {
+        var indexInGroup = Array.prototype.indexOf.call(siblings, el);
+        if (indexInGroup > 0) {
+          var step = narrow ? 70 : 90;
+          el.dataset.delay = String(Math.min(indexInGroup * step, narrow ? 280 : 360));
+        }
+      }
+      observer.observe(el);
+    });
+  })();
+</script>
+
+</body>
+</html>
