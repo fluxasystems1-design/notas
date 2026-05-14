@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>Mis apuntes de Claude · prompts y guía</title>
+<title>Mis apuntes de Claude</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
@@ -26,7 +26,6 @@
     --color-soft: #f4f4f2;
     --color-accent: #FF6B47;
     --color-dark: #0d0d0d;
-    --hero-bg: radial-gradient(125% 125% at 50% 10%, #000 40%, #63e 100%);
     --serif: 'Cormorant Garamond', Georgia, serif;
     --sans: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
   }
@@ -65,47 +64,12 @@
   section { padding: 3rem 0 3.25rem; }
 
   /* ---------- Tipografía editorial ---------- */
-  .display {
-    font-family: var(--serif);
-    font-weight: 500;
-    line-height: 1.05;
-    letter-spacing: -0.01em;
-  }
-
   .eyebrow {
     font-family: var(--sans);
     font-size: 12px;
     font-weight: 500;
     letter-spacing: 0.16em;
     text-transform: uppercase;
-  }
-
-  .lede {
-    font-family: var(--serif);
-    font-style: italic;
-    font-weight: 400;
-    font-size: clamp(1.125rem, 4.2vw, 1.375rem);
-    line-height: 1.45;
-    color: rgba(255,255,255,0.78);
-  }
-
-  /* ---------- Keyframes (respetados abajo en prefers-reduced-motion) ---------- */
-  @keyframes scroll-hint {
-    0%, 100% { transform: translateY(0); opacity: 0.85; }
-    50% { transform: translateY(6px); opacity: 1; }
-  }
-  @keyframes hero-glow {
-    0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.55; }
-    40% { transform: translate(4%, 6%) scale(1.06); opacity: 0.85; }
-    70% { transform: translate(-3%, 3%) scale(0.98); opacity: 0.65; }
-  }
-  @keyframes tip-pulse {
-    0%, 100% { transform: scale(1); filter: drop-shadow(0 0 0 transparent); }
-    50% { transform: scale(1.08); filter: drop-shadow(0 6px 14px rgba(255, 107, 71, 0.35)); }
-  }
-  @keyframes badge-shine {
-    from { opacity: 0; transform: translateX(-100%); }
-    to { opacity: 0.35; transform: translateX(100%); }
   }
 
   /* ---------- Animación al scroll ---------- */
@@ -125,420 +89,6 @@
     .reveal { opacity: 1; transform: none; transition: none; }
     html { scroll-behavior: auto; }
     body { background-attachment: scroll; }
-    .hero-scroll-arrow,
-    .hero::before,
-    .hero-badge::after,
-    .tip .icon { animation: none !important; }
-  }
-
-  /* ---------- HERO ---------- */
-  .hero {
-    background: var(--hero-bg);
-    color: #fff;
-    min-height: 100vh;
-    min-height: 100dvh;
-    display: flex;
-    align-items: center;
-    padding: max(5rem, calc(env(safe-area-inset-top) + 3rem)) 0 5.5rem;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .hero::before {
-    content: "";
-    position: absolute;
-    inset: -25%;
-    background: radial-gradient(ellipse 55% 45% at 28% 18%, rgba(255, 107, 71, 0.22), transparent 55%);
-    pointer-events: none;
-    animation: hero-glow 14s ease-in-out infinite;
-  }
-
-  .hero .container {
-    text-align: left;
-    position: relative;
-    z-index: 1;
-  }
-
-  .hero-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 14px;
-    border: 1px solid rgba(255,255,255,0.25);
-    border-radius: 999px;
-    color: #fff;
-    background: rgba(255,255,255,0.04);
-    backdrop-filter: blur(6px);
-    margin-bottom: 32px;
-    position: relative;
-    overflow: hidden;
-    isolation: isolate;
-    transition: border-color 0.35s ease, background 0.35s ease;
-  }
-  @media (hover: hover) and (pointer: fine) {
-    .hero-badge:hover {
-      border-color: rgba(255,255,255,0.42);
-      background: rgba(255,255,255,0.08);
-    }
-  }
-  .hero-badge::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.12) 50%, transparent 60%);
-    animation: badge-shine 4.5s ease-in-out infinite;
-    pointer-events: none;
-  }
-  .hero-badge::before {
-    content: "";
-    flex-shrink: 0;
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--color-accent);
-    box-shadow: 0 0 0 4px rgba(255,107,71,0.18);
-  }
-
-  .hero .hero-headline {
-    font-size: clamp(40px, 11vw, 56px);
-    color: #fff;
-    margin-bottom: 28px;
-    font-family: var(--serif);
-    font-weight: 500;
-    line-height: 1.05;
-    letter-spacing: -0.01em;
-  }
-  .hero .hero-headline .accent {
-    color: var(--color-accent);
-    font-style: italic;
-    font-weight: 600;
-  }
-
-  .hero p {
-    max-width: 560px;
-  }
-
-  .hero-scroll {
-    position: absolute;
-    bottom: max(1.25rem, env(safe-area-inset-bottom));
-    left: 50%;
-    transform: translateX(-50%);
-    color: rgba(255,255,255,0.6);
-    font-size: 10px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    text-align: center;
-    max-width: calc(100% - 2rem);
-    line-height: 1.4;
-  }
-  .hero-scroll-arrow {
-    display: inline-block;
-    margin-left: 2px;
-    animation: scroll-hint 1.65s ease-in-out infinite;
-  }
-
-  /* ---------- SECCIÓN: PROBLEMA ---------- */
-  .problem .section-head {
-    margin-bottom: 40px;
-  }
-  .problem h2 {
-    font-size: clamp(32px, 8vw, 44px);
-    margin-top: 12px;
-  }
-
-  .compare {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-
-  .card {
-    padding: 1.375rem 1.125rem;
-    border-radius: 6px;
-    position: relative;
-    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease;
-  }
-  @media (hover: hover) and (pointer: fine) {
-    .card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 18px 36px -20px rgba(0, 0, 0, 0.2);
-    }
-    .card.good:hover { box-shadow: 0 20px 40px -18px rgba(255, 107, 71, 0.25); }
-  }
-  .card:active { transform: scale(0.99); }
-  .card .card-tag {
-    font-size: 12px;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    font-weight: 700;
-    margin-bottom: 16px;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .card .prompt-text {
-    font-family: var(--serif);
-    font-style: italic;
-    font-size: clamp(1.125rem, 4.2vw, 1.375rem);
-    line-height: 1.38;
-    margin-bottom: 16px;
-    word-break: break-word;
-  }
-  .card .arrow {
-    color: var(--color-muted);
-    font-size: 12px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    margin-bottom: 8px;
-  }
-  .card .result {
-    color: var(--color-muted);
-    font-size: 15px;
-    line-height: 1.55;
-  }
-
-  .card.bad {
-    background: var(--color-soft);
-    color: #2b2b2b;
-  }
-  .card.bad .card-tag { color: #8a8a8a; }
-
-  .card.good {
-    background: #fff;
-    border: 1.5px solid var(--color-accent);
-    color: var(--color-ink);
-  }
-  .card.good .card-tag { color: var(--color-accent); }
-  .card.good::after {
-    content: "";
-    position: absolute;
-    inset: -1px;
-    border-radius: 4px;
-    pointer-events: none;
-  }
-
-  .closing-line {
-    margin-top: 40px;
-    text-align: center;
-    font-family: var(--serif);
-    font-size: clamp(22px, 5vw, 28px);
-    font-style: italic;
-    color: var(--color-ink);
-    line-height: 1.35;
-  }
-  .closing-line strong {
-    font-style: normal;
-    font-weight: 600;
-    background-image: linear-gradient(transparent 60%, rgba(255,107,71,0.28) 60%);
-    padding: 0 4px;
-  }
-
-  /* ---------- SECCIÓN: LAS 4 PARTES ---------- */
-  .parts h2 {
-    font-size: clamp(32px, 8vw, 44px);
-    margin-top: 12px;
-    margin-bottom: 8px;
-  }
-  .parts .intro-line {
-    color: var(--color-muted);
-    margin-bottom: 48px;
-    max-width: 520px;
-  }
-
-  .part {
-    display: grid;
-    grid-template-columns: minmax(2.75rem, auto) minmax(0, 1fr);
-    gap: 0.875rem 1rem;
-    padding: 1.5rem 0;
-    border-top: 1px solid var(--color-line);
-    align-items: start;
-  }
-  .part:last-child { border-bottom: 1px solid var(--color-line); }
-
-  .part .num {
-    font-family: var(--serif);
-    font-style: italic;
-    font-weight: 500;
-    font-size: clamp(2.5rem, 12vw, 4rem);
-    line-height: 0.88;
-    color: var(--color-ink);
-  }
-
-  .part h3 {
-    font-family: var(--sans);
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    margin-bottom: 10px;
-  }
-  .part p {
-    font-family: var(--serif);
-    font-size: clamp(1.125rem, 3.8vw, 1.375rem);
-    line-height: 1.42;
-    color: #2b2b2b;
-    word-break: break-word;
-  }
-
-  .part.featured {
-    background: var(--color-ink);
-    color: #fff;
-    margin: 1.5rem calc(-1 * max(1.125rem, env(safe-area-inset-left))) 0 calc(-1 * max(1.125rem, env(safe-area-inset-right)));
-    padding: 2rem max(1.125rem, env(safe-area-inset-left)) 2rem max(1.125rem, env(safe-area-inset-right));
-    border: none;
-    border-radius: 4px;
-    position: relative;
-  }
-  .part.featured + .part { border-top: none; }
-  .part.featured .num { color: var(--color-accent); }
-  .part.featured p { color: rgba(255,255,255,0.88); }
-  .part.featured .badge-most {
-    position: absolute;
-    top: -12px;
-    right: 16px;
-    background: var(--color-accent);
-    color: #fff;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    padding: 6px 10px;
-    border-radius: 999px;
-  }
-
-  /* ---------- SECCIÓN: EJEMPLO REAL ---------- */
-  .example h2 {
-    font-size: clamp(32px, 8vw, 44px);
-    margin-top: 12px;
-    margin-bottom: 32px;
-  }
-
-  .terminal {
-    background: var(--color-dark);
-    color: #ededed;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 24px 60px -20px rgba(0,0,0,0.35);
-    max-width: 100%;
-  }
-  .terminal-bar {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 12px 14px;
-    background: #181818;
-    border-bottom: 1px solid #222;
-  }
-  .terminal-bar span {
-    width: 10px; height: 10px; border-radius: 50%;
-    background: #3a3a3a;
-  }
-  .terminal-bar span:nth-child(1) { background: #ff5f57; }
-  .terminal-bar span:nth-child(2) { background: #febc2e; }
-  .terminal-bar span:nth-child(3) { background: #28c840; }
-  .terminal-bar .label {
-    margin-left: 12px;
-    width: auto; height: auto; border-radius: 0;
-    background: transparent;
-    color: #6b6b6b;
-    font-size: 11px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    font-family: var(--sans);
-  }
-
-  .terminal-body {
-    padding: 1rem 0.875rem;
-    font-family: 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace;
-    font-size: clamp(12px, 2.85vw, 14px);
-    line-height: 1.62;
-    color: #ededed;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    word-break: break-word;
-  }
-  .terminal-body p { margin-bottom: 14px; }
-  .terminal-body p:last-child { margin-bottom: 0; }
-  .terminal-body .ph {
-    color: var(--color-accent);
-  }
-  .terminal-body .prompt-marker {
-    color: var(--color-accent);
-    margin-right: 8px;
-  }
-
-  .mapping {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 10px;
-    margin-top: 28px;
-  }
-  .map-item {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 6px 10px;
-    padding: 0.75rem 0.875rem;
-    background: rgba(244, 244, 242, 0.92);
-    border-left: 3px solid var(--color-accent);
-    border-radius: 4px;
-    font-size: clamp(12px, 3.1vw, 13px);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
-  @media (hover: hover) and (pointer: fine) {
-    .map-item:hover {
-      transform: translateX(2px);
-      box-shadow: 0 8px 20px -12px rgba(0, 0, 0, 0.12);
-    }
-  }
-  .map-item .pn {
-    font-weight: 700;
-    color: var(--color-ink);
-    flex: 0 0 auto;
-  }
-  .map-item .arrow {
-    color: var(--color-accent);
-    font-weight: 700;
-  }
-  .map-item .meaning {
-    color: var(--color-muted);
-  }
-
-  /* ---------- SECCIÓN: TIP BONUS ---------- */
-  .tip {
-    background: var(--hero-bg);
-    color: #fff;
-    text-align: center;
-  }
-  .tip .icon {
-    font-size: 48px;
-    line-height: 1;
-    margin-bottom: 24px;
-    display: inline-block;
-    animation: tip-pulse 2.8s ease-in-out infinite;
-  }
-  .tip .eyebrow {
-    color: var(--color-accent);
-    margin-bottom: 16px;
-    display: inline-block;
-  }
-  .tip p {
-    font-family: var(--serif);
-    font-size: clamp(22px, 5.5vw, 30px);
-    line-height: 1.4;
-    color: #fff;
-    max-width: 620px;
-    margin: 0 auto;
-  }
-  .tip code {
-    font-family: 'SFMono-Regular', Menlo, Consolas, monospace;
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.18);
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 0.78em;
-    color: var(--color-accent);
-    font-style: normal;
   }
 
   /* ---------- FOOTER ---------- */
@@ -569,6 +119,7 @@
   .guide-intro {
     background: transparent;
     border-bottom: 1px solid rgba(10, 10, 10, 0.08);
+    padding-top: max(3.5rem, calc(env(safe-area-inset-top) + 2.25rem));
   }
   .guide-intro .guide-title {
     font-family: var(--serif);
@@ -665,6 +216,12 @@
     font-style: italic;
     color: #2b2b2b;
     margin-bottom: 20px;
+  }
+
+  .guide-outro {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-line);
   }
 
   .callout {
@@ -869,14 +426,6 @@
     .callout { font-size: clamp(1rem, 3.6vw, 1.125rem); padding: 1rem 1rem 1rem 1.125rem; }
     .term-block .term-name { font-size: clamp(1.25rem, 5.5vw, 1.5rem); }
     .checklist li { font-size: 14px; padding-top: 12px; padding-bottom: 12px; }
-    .problem h2,
-    .parts h2,
-    .example h2 { font-size: clamp(1.625rem, 7vw, 2.25rem); }
-    .part.featured .badge-most {
-      right: max(0.75rem, env(safe-area-inset-right));
-      font-size: 9px;
-      padding: 5px 8px;
-    }
   }
 
   /* ---------- DESKTOP (>= 768px) ---------- */
@@ -884,49 +433,16 @@
     .container { max-width: 880px; padding: 0 40px; }
     section { padding: 120px 0; }
 
-    .hero { padding: 120px 0; min-height: 100vh; }
-    .hero .hero-headline { font-size: clamp(64px, 7vw, 96px); max-width: 900px; }
-    .hero p.lede { font-size: 24px; max-width: 600px; }
-
-    .compare { grid-template-columns: 1fr 1fr; gap: 28px; }
-    .card { padding: 36px 32px; }
-    .card .prompt-text { font-size: 26px; }
-
-    .part { grid-template-columns: 120px 1fr; gap: 32px; padding: 44px 0; }
-    .part .num { font-size: 96px; }
-    .part h3 { font-size: 14px; }
-    .part p { font-size: 26px; }
-
-    .part.featured { margin: 32px 0 0; padding: 48px 40px; }
-    .part.featured .badge-most { top: -14px; right: 32px; }
-
-    .terminal-body { padding: 32px 28px; font-size: 15px; }
-
-    .mapping { grid-template-columns: 1fr 1fr; gap: 12px; }
-
-    .closing-line { margin-top: 56px; }
-
     .split-compare { grid-template-columns: 1fr 1fr; }
     .split-compare .col + .col { border-top: none; border-left: 1px solid var(--color-line); }
   }
 
   @media (min-width: 1024px) {
     .container { max-width: 960px; }
-    .hero .hero-headline { font-size: 104px; }
   }
 </style>
 </head>
 <body>
-
-  <!-- ============ HERO ============ -->
-  <section class="hero">
-    <div class="container">
-      <span class="hero-badge eyebrow reveal">La fórmula que nadie te enseñó</span>
-      <p class="hero-headline display reveal">El prompt que sí funciona tiene <span class="accent">4 partes</span>. ¿Sabes cuáles?</p>
-      <p class="lede reveal">La mayoría escribe: "Hazme un guión viral". Y después se quejan de que la respuesta es genérica. El problema no es Claude — es el prompt.</p>
-    </div>
-    <div class="hero-scroll reveal">Sigue leyendo <span class="hero-scroll-arrow" aria-hidden="true">↓</span></div>
-  </section>
 
   <!-- ============ GUÍA: INTRO + ÍNDICE ============ -->
   <section class="guide-intro">
@@ -934,145 +450,16 @@
       <h1 class="guide-title reveal">Mis apuntes de Claude</h1>
       <p class="guide-tag reveal">Todo lo que nadie te explica — en lenguaje normal</p>
       <blockquote class="pullquote reveal">A ver, antes de empezar… Si escuchaste hablar de Claude y no entendiste nada — esta guía es para ti. Vamos de lo más básico a lo que ya sí cambia cómo trabajas. Sin tecnicismos. Solo lo que necesitas saber. 🚀</blockquote>
-      <p class="toc-title reveal">Lo que vas a aprender</p>
+      <p class="toc-title reveal">📋 Lo que vas a aprender</p>
       <ol class="toc-list reveal">
         <li><a href="#ap-1">¿Qué es Claude?</a></li>
         <li><a href="#ap-2">Los modelos de Claude</a></li>
         <li><a href="#ap-3">¿Dónde usarlo?</a></li>
         <li><a href="#ap-4">Palabras que necesitas conocer</a></li>
-        <li><a href="#ap-5">Claude Code</a></li>
+        <li><a href="#ap-5">🔥 Claude Code</a></li>
         <li><a href="#ap-6">Planes y precios</a></li>
         <li><a href="#ap-7">El resumen que sí vas a recordar</a></li>
       </ol>
-    </div>
-  </section>
-
-  <!-- ============ PROBLEMA ============ -->
-  <section class="problem">
-    <div class="container">
-      <div class="section-head reveal">
-        <span class="eyebrow">01 — El problema</span>
-        <h2 class="display">Mismo modelo. Resultados opuestos.</h2>
-      </div>
-
-      <div class="compare">
-        <article class="card bad reveal">
-          <div class="card-tag">✕ Prompt genérico</div>
-          <p class="prompt-text">"Hazme un guión viral."</p>
-          <div class="arrow">— Resultado</div>
-          <p class="result">Un texto plano, lleno de lugares comunes, que podría servir para cualquiera y no conecta con nadie. Suena a IA.</p>
-        </article>
-
-        <article class="card good reveal">
-          <div class="card-tag">✓ Prompt con estructura</div>
-          <p class="prompt-text">"Escribe un guión de 60s para mi audiencia de [nicho], con tono [x], sobre [tema], evitando [y]."</p>
-          <div class="arrow">— Resultado</div>
-          <p class="result">Una pieza específica, con tu voz, lista para grabar. Útil de verdad porque le diste contexto, intención y límites.</p>
-        </article>
-      </div>
-
-      <p class="closing-line reveal">La diferencia no es talento.<br/>Es <strong>estructura</strong>.</p>
-    </div>
-  </section>
-
-  <!-- ============ LAS 4 PARTES ============ -->
-  <section class="parts">
-    <div class="container">
-      <div class="reveal">
-        <span class="eyebrow">02 — La fórmula</span>
-        <h2 class="display">Las 4 partes de un prompt que funciona.</h2>
-        <p class="intro-line">Cada parte responde a una pregunta distinta. Si te falta una, la respuesta se cae.</p>
-      </div>
-
-      <div class="part reveal">
-        <div class="num">01</div>
-        <div>
-          <h3>Qué quieres que haga</h3>
-          <p>La tarea exacta, con verbo de acción. "Escribe", "crea", "investiga". No "ayúdame con".</p>
-        </div>
-      </div>
-
-      <div class="part reveal">
-        <div class="num">02</div>
-        <div>
-          <h3>Cómo lo quieres</h3>
-          <p>Tono, estilo, formato. ¿Casual o profesional? ¿Ideas sueltas o un reporte? ¿Corto o detallado?</p>
-        </div>
-      </div>
-
-      <div class="part reveal">
-        <div class="num">03</div>
-        <div>
-          <h3>Para qué lo quieres</h3>
-          <p>Tu objetivo final. Esto hace que Claude apunte a lo que de verdad necesitas, no a lo genérico.</p>
-        </div>
-      </div>
-
-      <div class="part featured reveal">
-        <span class="badge-most">El más importante</span>
-        <div class="num">04</div>
-        <div>
-          <h3>Lo que NO quieres</h3>
-          <p>Las restricciones concretas que evitan que Claude se desvíe. Esto es lo que hace que suene como tú.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ EJEMPLO REAL ============ -->
-  <section class="example">
-    <div class="container">
-      <div class="reveal">
-        <span class="eyebrow">03 — En la práctica</span>
-        <h2 class="display">Míralo en acción.</h2>
-      </div>
-
-      <div class="terminal reveal">
-        <div class="terminal-bar">
-          <span></span><span></span><span></span>
-          <span class="label">prompt.txt</span>
-        </div>
-        <div class="terminal-body">
-          <p><span class="prompt-marker">›</span>Necesito que investigues temas de contenido para mi cuenta de <span class="ph">[red social]</span> donde hablo sobre <span class="ph">[temas principales]</span>. Encuentra ideas enfocadas en puntos de dolor que la gente busca activamente.</p>
-          <p>Entrega las ideas en forma de lista clara: tema, por qué duele, y un ángulo de contenido. Que sea directo y accionable, sin relleno.</p>
-          <p>El objetivo es tener un banco de ideas para crear contenido que conecte de verdad con mi audiencia y me posicione como referente en <span class="ph">[nicho]</span>.</p>
-          <p>No investigues nada relacionado a <span class="ph">[lo que no va con tu marca]</span>.</p>
-        </div>
-      </div>
-
-      <div class="mapping">
-        <div class="map-item reveal">
-          <span class="pn">Párrafo 1</span>
-          <span class="arrow">→</span>
-          <span class="meaning">Qué quieres</span>
-        </div>
-        <div class="map-item reveal">
-          <span class="pn">Párrafo 2</span>
-          <span class="arrow">→</span>
-          <span class="meaning">Cómo lo quieres</span>
-        </div>
-        <div class="map-item reveal">
-          <span class="pn">Párrafo 3</span>
-          <span class="arrow">→</span>
-          <span class="meaning">Para qué</span>
-        </div>
-        <div class="map-item reveal">
-          <span class="pn">Párrafo 4</span>
-          <span class="arrow">→</span>
-          <span class="meaning">Lo que NO quieres</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ TIP BONUS ============ -->
-  <section class="tip">
-    <div class="container">
-      <span class="icon reveal" aria-hidden="true">💡</span>
-      <div class="reveal">
-        <span class="eyebrow">Tip bonus</span>
-      </div>
-      <p class="reveal">Cuando Claude te dé una respuesta, escríbele: <code>"Audita tu plan"</code> — y él mismo encuentra errores en su propia respuesta y los mejora. Así de fácil.</p>
     </div>
   </section>
 
@@ -1093,7 +480,7 @@
       </div>
       <p class="callout reveal"><span class="callout-icon">💡</span>Si Claude fuera un carro, Anthropic es la fábrica. Y es una fábrica en la que las empresas más grandes del mundo ya apostaron.</p>
       <div class="prose reveal">
-        <p><strong>Ojo con esto:</strong> Claude no piensa como tú. No tiene emociones. No recuerda tus conversaciones anteriores. Es una máquina muy sofisticada detectando patrones en el lenguaje. Increíblemente bien entrenada — pero máquina al final.</p>
+        <p>📌 <strong>Ojo con esto:</strong> Claude <strong>no</strong> piensa como tú. No tiene emociones. No recuerda tus conversaciones anteriores. Es una máquina muy sofisticada detectando patrones en el lenguaje. Increíblemente bien entrenada — pero máquina al final.</p>
       </div>
     </div>
   </section>
@@ -1156,7 +543,6 @@
       </div>
 
       <div class="term-block reveal">
-        <h3>Vocabulario</h3>
         <p class="term-name"><span class="emoji">💬</span>Prompt</p>
         <div class="prose">
           <p>Es lo que le escribes a Claude. La instrucción. La pregunta. La tarea. <strong>La calidad de la respuesta depende directamente de qué tan bien escribes el prompt.</strong> Literal. No es magia — es estructura.</p>
@@ -1256,7 +642,7 @@
         <p>✏️ <strong>¿Quién es?</strong> → "Eres mi asistente de contenido para Instagram…"</p>
         <p>✏️ <strong>¿Cómo habla?</strong> → Tono, estilo, qué palabras usa y cuáles no</p>
         <p>✏️ <strong>¿Cómo organiza el trabajo?</strong> → Cómo nombra archivos, dónde guarda cosas</p>
-        <p>✏️ <strong>¿Qué no hace?</strong> → Sus límites claros</p>
+        <p>✏️ <strong>¿Qué NO hace?</strong> → Sus límites claros</p>
       </div>
       <p class="callout reveal"><span class="callout-icon">💡</span>Truco: escribe <code>/init</code> en el chat y Claude crea su propio CLAUDE.md leyendo tu proyecto. Él lo genera solo. Después tú lo ajustas.</p>
 
@@ -1267,9 +653,12 @@
         <h2 class="chapter-title">Skills — lo que le enseñas a hacer</h2>
       </div>
       <div class="prose reveal">
-        <p><strong>Skill (habilidad):</strong> instrucciones muy detalladas para una tarea específica. Le enseñas a Claude exactamente cómo hacer algo — paso a paso, siempre igual, con tu criterio. Se activan con un comando que empieza con <strong>/</strong>.</p>
+        <p><strong>Skill (habilidad)</strong> Instrucciones muy detalladas para una tarea específica. Le enseñas a Claude exactamente cómo hacer algo — paso a paso, siempre igual, con tu criterio. Se activan con un comando que empieza con <strong>/</strong>.</p>
       </div>
-      <p class="callout reveal"><span class="callout-icon">💡</span>Si puedes enseñarle a un empleado cómo hacer algo, puedes enseñárselo a Claude con una skill. Lo entrenas una vez. Lo usas mil veces.</p>
+      <p class="callout reveal"><span class="callout-icon">💡</span>Si puedes enseñarle a un empleado cómo hacer algo, puedes enseñárselo a Claude con una Skill. Lo entrenas una vez. Lo usas mil veces.</p>
+      <div class="prose reveal">
+        <p><strong>Ejemplos concretos:</strong></p>
+      </div>
       <div class="scroll-table reveal">
         <table>
           <thead>
@@ -1330,7 +719,7 @@
         <p class="callout"><span class="callout-icon">💡</span>Necesitas revisar 20 competidores en Instagram. Claude lanza 20 subagentes al mismo tiempo, cada uno con uno. En minutos tienes el análisis completo.</p>
       </div>
       <div class="term-block reveal">
-        <p class="term-name"><span class="emoji">👁️</span>Headless mode</p>
+        <p class="term-name"><span class="emoji">👁️</span>Headless Mode</p>
         <div class="prose">
           <p>Claude Code corriendo solo, sin que tú estés mirando. Puedes programar tareas automáticas — todos los días, a la hora que quieras — mientras duermes.</p>
         </div>
@@ -1341,7 +730,7 @@
 
       <div class="chapter-head reveal">
         <span class="eyebrow">Cómo se conecta todo</span>
-        <h2 class="chapter-title">Las piezas en una sola mesa</h2>
+        <h2 class="chapter-title">Cómo se conecta todo</h2>
       </div>
       <div class="scroll-table reveal">
         <table>
@@ -1355,7 +744,7 @@
           </tbody>
         </table>
       </div>
-      <p class="quote-block reveal">"Escribe el reporte de campaña en mi voz, saca los datos de Analytics y publica los highlights en Slack"</p>
+      <p class="quote-block reveal"><em>Escribe el reporte de campaña en mi voz, saca los datos de Analytics y publica los highlights en Slack</em></p>
       <div class="prose reveal">
         <p>Y aquí es donde todo cambia. Con los tres juntos, le dices una sola cosa como la de arriba — Claude lo hace todo solo. En minutos. Sin que muevas un dedo. 🤯</p>
       </div>
@@ -1387,7 +776,7 @@
         </table>
       </div>
       <div class="prose reveal">
-        <p><strong>Mi recomendación:</strong> empieza con Free o Pro. Úsalo, siente cuánto consumes, y después decides si necesitas más. El problema no es el plan — el problema es no usarlo.</p>
+        <p>📌 <strong>Mi recomendación:</strong> empieza con Free o Pro. Úsalo, siente cuánto consumes, y después decides si necesitas más. El problema no es el plan — el problema es no usarlo.</p>
       </div>
     </div>
   </section>
@@ -1413,14 +802,17 @@
         <li><strong>Agente</strong> = Claude que trabaja solo hasta terminar una tarea.</li>
         <li><strong>Subagente</strong> = varios Claude haciendo cosas en paralelo al mismo tiempo.</li>
       </ul>
+      <div class="prose reveal guide-outro">
+        <p>🌱 El que aprende esto hoy lleva ventaja mañana. No es exagerado. Es lo mismo que pasó con los que aprendieron a usar internet antes que los demás. Tu momento es ahora — y ya empezaste.</p>
+      </div>
     </div>
   </section>
 
   <!-- ============ FOOTER ============ -->
   <footer>
     <div class="container">
-      <span class="mark">Prompt<span class="dot"></span></span>
-      <p>Aprende a usar IA de verdad.</p>
+      <span class="mark">Mis apuntes<span class="dot"></span></span>
+      <p>Todo lo que nadie te explica — en lenguaje normal</p>
     </div>
   </footer>
 
