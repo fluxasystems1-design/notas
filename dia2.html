@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>La fórmula del prompt · Día 2 · Mis apuntes de Claude</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  /* Base: index.html — paleta y fondo Día 2 oscuro */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --accent: #D97757;
+    --accent-soft: rgba(217, 119, 87, 0.12);
+    --text: #F0EDE8;
+    --text-muted: #888888;
+    --surface: #1A1A1A;
+    --border: #2A2A2A;
+    --color-bg: #0D0D0D;
+    --color-ink: var(--text);
+    --color-muted: var(--text-muted);
+    --color-line: var(--border);
+    --color-soft: var(--surface);
+    --color-accent: var(--accent);
+    --color-dark: #0A0A0A;
+    --serif: 'Cormorant Garamond', Georgia, serif;
+    --sans: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 72px;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    font-family: var(--sans);
+    color: var(--text);
+    background: #0D0D0D;
+    line-height: 1.6;
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: clip;
+  }
+
+  ::selection { background: var(--accent); color: #fff; }
+
+  /* Fondo: orbes + estrellas */
+  .bg-orbs {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .stars-field {
+    position: absolute;
+    inset: -20%;
+    width: 140%;
+    height: 140%;
+    will-change: transform, opacity;
+  }
+  .stars-field--a {
+    opacity: 0.55;
+    background-image:
+      radial-gradient(1.5px 1.5px at 8% 14%, rgba(255,255,255,0.55), transparent),
+      radial-gradient(1px 1px at 22% 38%, rgba(255,255,255,0.35), transparent),
+      radial-gradient(1px 1px at 35% 9%, rgba(217,119,87,0.45), transparent),
+      radial-gradient(1.5px 1.5px at 48% 62%, rgba(255,255,255,0.4), transparent),
+      radial-gradient(1px 1px at 61% 28%, rgba(255,255,255,0.3), transparent),
+      radial-gradient(1px 1px at 73% 82%, rgba(255,255,255,0.5), transparent),
+      radial-gradient(1px 1px at 86% 41%, rgba(217,119,87,0.35), transparent),
+      radial-gradient(1.5px 1.5px at 94% 58%, rgba(255,255,255,0.28), transparent),
+      radial-gradient(1px 1px at 14% 76%, rgba(255,255,255,0.32), transparent),
+      radial-gradient(1px 1px at 52% 93%, rgba(255,255,255,0.38), transparent),
+      radial-gradient(1px 1px at 78% 11%, rgba(255,255,255,0.25), transparent),
+      radial-gradient(1px 1px at 41% 47%, rgba(217,119,87,0.3), transparent);
+    animation: stars-drift-a 100s linear infinite, star-twinkle-a 6s ease-in-out infinite alternate;
+  }
+  .stars-field--b {
+    opacity: 0.35;
+    background-image:
+      radial-gradient(1px 1px at 12% 52%, rgba(255,255,255,0.4), transparent),
+      radial-gradient(1.5px 1.5px at 28% 18%, rgba(255,255,255,0.25), transparent),
+      radial-gradient(1px 1px at 44% 71%, rgba(217,119,87,0.4), transparent),
+      radial-gradient(1px 1px at 57% 35%, rgba(255,255,255,0.3), transparent),
+      radial-gradient(1px 1px at 69% 64%, rgba(255,255,255,0.45), transparent),
+      radial-gradient(1.5px 1.5px at 81% 22%, rgba(255,255,255,0.2), transparent),
+      radial-gradient(1px 1px at 91% 79%, rgba(255,255,255,0.35), transparent),
+      radial-gradient(1px 1px at 6% 88%, rgba(217,119,87,0.3), transparent),
+      radial-gradient(1px 1px at 33% 61%, rgba(255,255,255,0.28), transparent),
+      radial-gradient(1px 1px at 66% 48%, rgba(255,255,255,0.32), transparent);
+    animation: stars-drift-b 140s linear infinite reverse, star-twinkle-b 8s ease-in-out infinite alternate;
+  }
+  .shooting-star {
+    position: absolute;
+    top: 18%;
+    left: -15%;
+    width: 140px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), rgba(255,255,255,0.7), rgba(217,119,87,0.4), transparent);
+    border-radius: 2px;
+    transform: rotate(-22deg);
+    opacity: 0;
+    animation: shooting 9s ease-in-out infinite;
+  }
+  .shooting-star + .shooting-star {
+    top: 62%;
+    animation-delay: 4.5s;
+    animation-duration: 11s;
+    width: 100px;
+    transform: rotate(-18deg);
+  }
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    will-change: transform, opacity;
+  }
+  .orb-1 {
+    width: 500px;
+    height: 500px;
+    top: -120px;
+    left: -140px;
+    background: radial-gradient(circle, rgba(217, 119, 87, 0.09) 0%, transparent 70%);
+    filter: blur(120px);
+    animation: orb-drift-1 14s ease-in-out infinite alternate, orb-breathe 10s ease-in-out infinite;
+  }
+  .orb-2 {
+    width: 400px;
+    height: 400px;
+    bottom: -100px;
+    right: -120px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.04) 0%, transparent 70%);
+    filter: blur(150px);
+    animation: orb-drift-2 16s ease-in-out infinite alternate, orb-breathe 12s ease-in-out infinite reverse;
+  }
+  @keyframes stars-drift-a {
+    from { transform: translate(0, 0); }
+    to { transform: translate(-3%, -2%); }
+  }
+  @keyframes stars-drift-b {
+    from { transform: translate(0, 0); }
+    to { transform: translate(2%, 3%); }
+  }
+  @keyframes star-twinkle-a {
+    from { opacity: 0.35; }
+    to { opacity: 0.7; }
+  }
+  @keyframes star-twinkle-b {
+    from { opacity: 0.2; }
+    to { opacity: 0.5; }
+  }
+  @keyframes shooting {
+    0%, 78%, 100% { opacity: 0; transform: translateX(0) rotate(-22deg); }
+    82% { opacity: 1; }
+    92% { opacity: 0; transform: translateX(115vw) rotate(-22deg); }
+  }
+  @keyframes orb-drift-1 {
+    from { transform: translate(0, 0); }
+    to { transform: translate(56px, 42px); }
+  }
+  @keyframes orb-drift-2 {
+    from { transform: translate(0, 0); }
+    to { transform: translate(-44px, -52px); }
+  }
+  @keyframes orb-breathe {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+  }
+
+  .page-wrap { position: relative; z-index: 1; }
+
+  .container {
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto;
+    padding-left: max(1.125rem, env(safe-area-inset-left));
+    padding-right: max(1.125rem, env(safe-area-inset-right));
+  }
+
+  section { padding: 2rem 0 2.25rem; }
+
+  .eyebrow {
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(1.75rem) scale(0.985);
+    transition:
+      opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity, transform;
+  }
+  .reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal { opacity: 1; transform: none; transition: none; }
+    html { scroll-behavior: auto; scroll-padding-top: 24px; }
+    .orb-1, .orb-2,
+    .stars-field--a, .stars-field--b,
+    .shooting-star { animation: none; }
+    .stars-field--a { opacity: 0.4; }
+    .stars-field--b { opacity: 0.25; }
+  }
+
+  .lesson-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    padding: 10px max(1.125rem, env(safe-area-inset-left));
+    padding-top: max(10px, env(safe-area-inset-top));
+    background: rgba(26, 26, 26, 0.72);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .lesson-nav a {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-decoration: none;
+    padding: 8px 14px;
+    border-radius: 999px;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    background: rgba(26, 26, 26, 0.5);
+    transition: color 0.2s, background 0.2s, border-color 0.2s;
+  }
+  .lesson-nav a:hover { color: var(--accent); border-color: var(--accent); }
+  .lesson-nav a.is-active {
+    color: #fff;
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .lesson-nav .nav-label-long { display: none; }
+
+  .site-header {
+    background: rgba(13, 13, 13, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 0;
+    padding-top: max(12px, env(safe-area-inset-top));
+  }
+  .site-header .container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .site-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: var(--text);
+  }
+  .site-logo-text {
+    font-family: var(--serif);
+    font-size: 1.25rem;
+    font-weight: 500;
+  }
+  .header-badge {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #fff;
+    background: var(--accent);
+    padding: 7px 14px;
+    border-radius: 999px;
+    flex-shrink: 0;
+  }
+
+  footer {
+    background: #000;
+    border-top: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 2rem 0 max(2rem, env(safe-area-inset-bottom));
+    text-align: center;
+  }
+  footer .mark {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 22px;
+    color: var(--text);
+    margin-bottom: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  footer p { font-size: 13px; }
+
+  .guide-intro {
+    background: transparent;
+    border-bottom: 1px solid var(--border);
+    padding-top: 1.25rem;
+  }
+  .guide-intro .guide-title {
+    font-family: var(--serif);
+    font-size: clamp(36px, 9vw, 52px);
+    font-weight: 500;
+    line-height: 1.1;
+    margin-bottom: 12px;
+    color: var(--text);
+  }
+  .guide-intro .guide-tag {
+    font-family: var(--sans);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+  .guide-intro .pullquote {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: clamp(20px, 4.5vw, 26px);
+    line-height: 1.45;
+    color: var(--text);
+    padding: 16px 0 16px 16px;
+    border-left: 3px solid var(--accent);
+    margin-bottom: 24px;
+  }
+  .guide-intro .toc-title {
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+  .guide-intro .toc-list {
+    list-style: none;
+    counter-reset: toc;
+  }
+  .guide-intro .toc-list li {
+    counter-increment: toc;
+    border-top: 1px solid var(--border);
+  }
+  .guide-intro .toc-list a {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-height: 40px;
+    padding: 6px 4px 6px 0;
+    text-decoration: none;
+    color: var(--text);
+    font-size: clamp(15px, 3.8vw, 17px);
+    transition: color 0.25s ease, transform 0.25s ease;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  .guide-intro .toc-list a:active { transform: scale(0.98); }
+  .guide-intro .toc-list a::before {
+    content: counter(toc, decimal-leading-zero);
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 22px;
+    color: var(--text-muted);
+    min-width: 2ch;
+  }
+  .guide-intro .toc-list a:hover { color: var(--accent); }
+
+  .guide { background: transparent; }
+  .guide .chapter-head { margin-bottom: 18px; }
+  .guide h2.chapter-title {
+    font-family: var(--serif);
+    font-size: clamp(30px, 7vw, 40px);
+    font-weight: 500;
+    line-height: 1.15;
+    margin-top: 6px;
+    color: var(--accent);
+  }
+  .guide .prose {
+    font-size: 16px;
+    line-height: 1.65;
+    color: var(--text);
+    max-width: 640px;
+  }
+  .guide .prose p { margin-bottom: 12px; }
+  .guide .prose p:last-child { margin-bottom: 0; }
+  .guide .prose strong { font-weight: 700; color: var(--text); }
+
+  .guide-outro {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .callout {
+    margin: 16px 0;
+    padding: 14px 16px 14px 18px;
+    background: var(--surface);
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 19px;
+    line-height: 1.45;
+    color: var(--text);
+  }
+  .callout .callout-icon { font-style: normal; margin-right: 6px; }
+  .callout .callout-follow {
+    display: block;
+    margin-top: 12px;
+    font-family: var(--sans);
+    font-style: normal;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--text-muted);
+  }
+
+  .aside-warn {
+    margin: 16px 0;
+    padding: 14px 16px;
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    font-size: 15px;
+    line-height: 1.55;
+  }
+
+  .scroll-table {
+    margin: 16px 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+  }
+  .scroll-table table {
+    width: 100%;
+    min-width: 520px;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  .scroll-table th,
+  .scroll-table td {
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .scroll-table th {
+    font-family: var(--sans);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 700;
+    background: var(--surface);
+    color: var(--text);
+  }
+  .scroll-table tr:last-child td { border-bottom: none; }
+  .scroll-table td { color: var(--text-muted); }
+  .scroll-table td strong { color: var(--text); }
+
+  .term-block {
+    margin: 14px 0;
+    padding: 16px 16px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--surface);
+  }
+  .term-block h3 {
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    color: var(--accent);
+  }
+  .term-block .term-name {
+    font-family: var(--serif);
+    font-size: 26px;
+    font-weight: 500;
+    margin-bottom: 12px;
+    line-height: 1.2;
+    color: var(--text);
+  }
+  .badge-critical {
+    display: inline-block;
+    font-family: var(--sans);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    background: var(--accent);
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 999px;
+    margin-bottom: 10px;
+  }
+
+  .split-compare {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+    margin: 16px 0;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .split-compare .col {
+    padding: 16px 14px;
+    background: var(--surface);
+  }
+  .split-compare .col + .col {
+    border-top: 1px solid var(--border);
+  }
+  .split-compare .col.bad { box-shadow: inset 3px 0 0 rgba(200, 70, 70, 0.55); }
+  .split-compare .col.good { box-shadow: inset 3px 0 0 var(--accent); }
+  .split-compare .col h4 {
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    color: var(--text-muted);
+  }
+  .split-compare .col.bad h4 { color: #c47070; }
+  .split-compare .col.good h4 { color: var(--accent); }
+  .split-compare .prompt-sample {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: clamp(1rem, 3.5vw, 1.125rem);
+    line-height: 1.45;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+  .split-compare .col.good .prompt-sample {
+    font-style: normal;
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.55;
+  }
+  .split-compare .sub {
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--text-muted);
+  }
+  .split-compare ul {
+    list-style: none;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+  .split-compare li { padding: 6px 0; padding-left: 22px; position: relative; }
+  .split-compare li::before {
+    content: "·";
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .checklist {
+    list-style: none;
+    margin-top: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0 16px;
+  }
+  .checklist li {
+    padding: 10px 0 10px 44px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--text);
+  }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist--framework { counter-reset: fw -1; }
+  .checklist--framework li::before {
+    content: counter(fw);
+    counter-increment: fw;
+    position: absolute;
+    left: 0;
+    top: 12px;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 22px;
+    color: var(--accent);
+    width: 32px;
+    text-align: center;
+  }
+
+  .quote-block {
+    margin: 16px 0;
+    padding: 18px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: clamp(20px, 4vw, 24px);
+    line-height: 1.45;
+    text-align: center;
+    color: var(--text);
+  }
+
+  .terminal {
+    background: #0A0A0A;
+    border: 1px solid var(--surface);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 16px 40px -16px rgba(0,0,0,0.5);
+    margin: 16px 0;
+  }
+  .terminal-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 14px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+  .terminal-bar span {
+    width: 10px; height: 10px; border-radius: 50%;
+  }
+  .terminal-bar span:nth-child(1) { background: #ff5f57; }
+  .terminal-bar span:nth-child(2) { background: #febc2e; }
+  .terminal-bar span:nth-child(3) { background: #28c840; }
+  .terminal-bar .label {
+    margin-left: 12px;
+    color: var(--text-muted);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-family: var(--sans);
+  }
+  .terminal-body {
+    padding: 1.25rem 1rem;
+    font-family: 'SFMono-Regular', Menlo, Consolas, monospace;
+    font-size: clamp(12px, 2.85vw, 13px);
+    line-height: 1.62;
+    color: var(--text);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    word-break: break-word;
+  }
+  .terminal-body .block-label {
+    color: var(--accent);
+    font-weight: 700;
+    font-family: var(--sans);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-top: 16px;
+    margin-bottom: 6px;
+    display: block;
+  }
+  .terminal-body .block-label:first-child { margin-top: 0; }
+  .terminal-body p { margin-bottom: 12px; color: #d8d4cf; }
+
+  .guide hr.divider {
+    border: none;
+    height: 1px;
+    background: var(--border);
+    margin: 28px 0;
+  }
+
+  .guide code {
+    font-family: 'SFMono-Regular', Menlo, Consolas, monospace;
+    font-size: 0.88em;
+    background: rgba(255,255,255,0.08);
+    padding: 2px 7px;
+    border-radius: 3px;
+    font-style: normal;
+    color: var(--text);
+  }
+
+  section[id^="p-"] { scroll-margin-top: 80px; }
+
+  @media (max-width: 767px) {
+    .site-header { display: none; }
+    .lesson-nav {
+      flex-wrap: nowrap;
+      justify-content: center;
+      gap: 6px;
+      padding: max(6px, env(safe-area-inset-top)) max(1.125rem, env(safe-area-inset-left)) 6px max(1.125rem, env(safe-area-inset-right));
+      background: rgba(26, 26, 26, 0.38);
+    }
+    .lesson-nav a {
+      flex: 0 1 auto;
+      text-align: center;
+      padding: 5px 12px;
+      font-size: 12px;
+      letter-spacing: 0.02em;
+      background: rgba(26, 26, 26, 0.4);
+      border-color: var(--border);
+      color: var(--text-muted);
+    }
+    .lesson-nav a.is-active {
+      background: color-mix(in srgb, var(--accent) 58%, transparent);
+      border-color: color-mix(in srgb, var(--accent) 58%, transparent);
+      color: #fff;
+    }
+    section[id^="p-"] { scroll-margin-top: 56px; }
+    .guide-intro { padding-top: 1rem; }
+    .guide .prose { font-size: 15px; }
+    .callout { font-size: clamp(1rem, 3.6vw, 1.125rem); padding: 1rem 1rem 1rem 1.125rem; }
+    .term-block .term-name { font-size: clamp(1.25rem, 5.5vw, 1.5rem); }
+    .checklist li { font-size: 14px; }
+    .scroll-table th, .scroll-table td { padding: 0.65rem 0.75rem; font-size: 13px; }
+    .scroll-table table { min-width: 480px; }
+  }
+
+  @media (min-width: 768px) {
+    .lesson-nav .nav-label-short { display: none; }
+    .lesson-nav .nav-label-long { display: inline; }
+    .container { max-width: 880px; padding: 0 40px; }
+    section { padding: 56px 0; }
+    .guide-intro { padding-top: 1.75rem; }
+    .split-compare { grid-template-columns: 1fr 1fr; }
+    .split-compare .col + .col {
+      border-top: none;
+      border-left: 1px solid var(--border);
+    }
+    .site-header { position: sticky; top: 0; z-index: 99; }
+    .lesson-nav { position: static; }
+  }
+
+  @media (min-width: 1024px) {
+    .container { max-width: 960px; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="bg-orbs" aria-hidden="true">
+    <div class="stars-field stars-field--a"></div>
+    <div class="stars-field stars-field--b"></div>
+    <span class="shooting-star"></span>
+    <span class="shooting-star"></span>
+    <span class="orb orb-1"></span>
+    <span class="orb orb-2"></span>
+  </div>
+
+  <div class="page-wrap">
+
+  <nav class="lesson-nav" aria-label="Lecciones del curso">
+    <a href="index.html"><span class="nav-label-short">Día 1</span><span class="nav-label-long">Día 1 · Intro a Claude</span></a>
+    <a href="dia2.html" class="is-active"><span class="nav-label-short">Día 2</span><span class="nav-label-long">Día 2 · La fórmula del prompt</span></a>
+  </nav>
+
+  <header class="site-header">
+    <div class="container">
+      <a href="index.html" class="site-logo" aria-label="Mis apuntes — volver al día 1">
+        <img src="imagenes/ChatGPT Image 19 may 2026, 06_42_50 p.m..png" alt="Claude" style="height:32px; width:auto; object-fit:contain; vertical-align:middle; filter:brightness(1.1);">
+        <span class="site-logo-text">Mis apuntes</span>
+      </a>
+      <span class="header-badge">Día 2</span>
+    </div>
+  </header>
+
+  <section class="guide-intro">
+    <div class="container">
+      <h1 class="guide-title reveal">La fórmula del prompt que realmente funciona</h1>
+      <p class="guide-tag reveal">Cómo escribirle a Claude para que deje de sonar genérico</p>
+      <blockquote class="pullquote reveal"><span aria-hidden="true">🎯</span> "El problema no es Claude. Es el prompt."</blockquote>
+      <p class="toc-title reveal">En esta lección</p>
+      <ol class="toc-list reveal">
+        <li><a href="#p-0">El error más común</a></li>
+        <li><a href="#p-1">La parte 0: contexto</a></li>
+        <li><a href="#p-2">Las 4 partes clásicas</a></li>
+        <li><a href="#p-3">El framework completo</a></li>
+        <li><a href="#p-4">Ejemplo real completo</a></li>
+        <li><a href="#p-5">Los 3 prompts de revisión</a></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="guide" id="p-0">
+    <div class="container">
+      <div class="chapter-head reveal">
+        <span class="eyebrow">0</span>
+        <h2 class="chapter-title">El error más común</h2>
+      </div>
+      <div class="prose reveal">
+        <p>La mayoría le escribe a Claude sin estructura y después se queja de que la respuesta suena genérica. El problema no es el modelo.</p>
+      </div>
+      <div class="split-compare reveal">
+        <div class="col bad">
+          <h4>✕ Malo</h4>
+          <p class="prompt-sample">"Hazme un guión viral"</p>
+          <p class="sub">Sin contexto, sin formato, sin objetivo, sin límites. El modelo rellena con lugares comunes.</p>
+        </div>
+        <div class="col good">
+          <h4>✓ Bueno</h4>
+          <ul>
+            <li><strong>Contexto:</strong> quién eres y para quién hablas.</li>
+            <li><strong>Tarea:</strong> verbo exacto + tema.</li>
+            <li><strong>Formato:</strong> cómo quieres la entrega.</li>
+            <li><strong>Objetivo:</strong> para qué lo usarás.</li>
+            <li><strong>Restricciones:</strong> qué NO quieres.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="guide" id="p-1">
+    <div class="container">
+      <div class="chapter-head reveal">
+        <span class="eyebrow">1</span>
+        <h2 class="chapter-title">La parte 0: contexto</h2>
+      </div>
+      <div class="prose reveal">
+        <p>Antes de las 4 partes que todos enseñan existe una parte 0 que casi nadie menciona: quién eres tú y qué rol debe asumir el modelo.</p>
+        <p>Sin ese contexto, Claude asume defaults genéricos — tono neutro, audiencia genérica, ejemplos que podrían ser de cualquiera.</p>
+      </div>
+      <div class="split-compare reveal">
+        <div class="col bad">
+          <h4>Sin contexto</h4>
+          <p class="prompt-sample">"Escribe un guión"</p>
+        </div>
+        <div class="col good">
+          <h4>Con contexto</h4>
+          <p class="prompt-sample">"Eres un copywriter especializado en marcas personales latinas. Tengo audiencia de emprendedores 25-35, tono cercano y directo. Escribe un guión para Reels sobre productividad."</p>
+        </div>
+      </div>
+      <p class="callout reveal"><span class="callout-icon">💡</span> Puedes escribir este contexto una sola vez al inicio de la conversación. Claude lo mantiene activo durante toda la sesión.</p>
+    </div>
+  </section>
+
+  <section class="guide" id="p-2">
+    <div class="container">
+      <div class="chapter-head reveal">
+        <span class="eyebrow">2</span>
+        <h2 class="chapter-title">Las 4 partes clásicas</h2>
+      </div>
+      <div class="prose reveal">
+        <p>Cada parte responde a una pregunta. Si falta una, la respuesta se desarma.</p>
+      </div>
+
+      <div class="term-block reveal">
+        <h3>1</h3>
+        <p class="term-name">Qué quieres que haga</p>
+        <div class="prose">
+          <p>Verbo de acción exacto: "Escribe", "Crea", "Investiga". Nunca "ayúdame con".</p>
+        </div>
+      </div>
+
+      <div class="term-block reveal">
+        <h3>2</h3>
+        <p class="term-name">Cómo lo quieres</p>
+        <div class="prose">
+          <p>Tono, estilo, formato. ¿Casual o profesional? ¿Lista o reporte? ¿Breve o detallado?</p>
+        </div>
+      </div>
+
+      <div class="term-block reveal">
+        <h3>3</h3>
+        <p class="term-name">Para qué lo quieres</p>
+        <div class="prose">
+          <p>El objetivo final. Hace que Claude apunte a lo que realmente necesitas, no a una respuesta de manual.</p>
+        </div>
+      </div>
+
+      <div class="term-block reveal">
+        <span class="badge-critical">El más crítico</span>
+        <h3>4</h3>
+        <p class="term-name">Lo que NO quieres</p>
+        <div class="prose">
+          <p>Las restricciones concretas. Es lo que hace que el resultado suene como tú y no como un template de IA.</p>
+        </div>
+      </div>
+
+      <aside class="aside-warn reveal">Un prompt sin restricciones es como pedirle a alguien que cocine "algo rico" sin decirle tus alergias.</aside>
+    </div>
+  </section>
+
+  <section class="guide" id="p-3">
+    <div class="container">
+      <div class="chapter-head reveal">
+        <span class="eyebrow">3</span>
+        <h2 class="chapter-title">El framework completo</h2>
+      </div>
+      <div class="prose reveal">
+        <p>Junta la parte 0 con las 4 clásicas y añade un paso final que casi nadie usa: el ejemplo de output ideal.</p>
+      </div>
+      <ul class="checklist checklist--framework reveal">
+        <li><strong>0. Contexto</strong> → quién eres tú + qué rol asume el modelo</li>
+        <li><strong>1. Rol / tarea</strong> → qué quieres que haga (verbo exacto)</li>
+        <li><strong>2. Formato</strong> → cómo quieres la respuesta</li>
+        <li><strong>3. Objetivo</strong> → para qué lo vas a usar</li>
+        <li><strong>4. Restricciones</strong> → qué NO quieres (el más crítico)</li>
+        <li><strong>5. Ejemplo de output</strong> → cómo luce una respuesta perfecta</li>
+      </ul>
+      <p class="callout reveal"><span class="callout-icon">💡</span> El paso 5 es el más subestimado. Mostrar cómo luce una respuesta perfecta convierte respuestas buenas en respuestas que usas sin editar.</p>
+    </div>
+  </section>
+
+  <section class="guide" id="p-4">
+    <div class="container">
+      <div class="chapter-head reveal">
+        <span class="eyebrow">4</span>
+        <h2 class="chapter-title">Ejemplo real completo</h2>
+      </div>
+      <div class="prose reveal">
+        <p>Así se ve el framework aplicado de principio a fin.</p>
+      </div>
+      <div class="terminal reveal">
+        <div class="terminal-bar">
+          <span></span><span></span><span></span>
+          <span class="label">prompt-completo</span>
+        </div>
+        <div class="terminal-body">
+          <span class="block-label">Contexto</span>
+          <p>Soy fotógrafo freelance. Me especializo en retratos y fotos de producto para marcas pequeñas. Mi audiencia son dueños de tiendas online que quieren fotos profesionales sin pagar una producción enorme. Tono: cercano, sin tecnicismos.</p>
+          <span class="block-label">Tarea</span>
+          <p>Escribe 5 ideas de contenido para Instagram que muestren el valor de una buena foto de producto frente a una foto de celular.</p>
+          <span class="block-label">Formato</span>
+          <p>Lista numerada. Cada idea con: título del post (máx. 8 palabras), por qué conecta con la audiencia (1 línea), tipo de contenido recomendado (foto, carrusel o reel — 1 línea).</p>
+          <span class="block-label">Objetivo</span>
+          <p>Atraer clientes que ya tienen productos pero no invierten en fotografía porque no ven la diferencia. Convencerlos antes de que lleguen a preguntar precio.</p>
+          <span class="block-label">Restricciones</span>
+          <p>Sin frases tipo "la imagen lo es todo". Sin hablar de equipo técnico ni lentes. Sin emojis. Que suene como consejo de colega, no como anuncio.</p>
+          <span class="block-label">Ejemplo de output ideal</span>
+          <p>1. "Antes y después que nadie se espera ver"<br>
+          Por qué conecta: activa la curiosidad sin prometer nada.<br>
+          Tipo: carrusel comparativo, misma prenda o producto, dos fotos distintas.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="guide" id="p-5">
+    <div class="container">
+      <div class="chapter-head reveal">
+        <span class="eyebrow">5</span>
+        <h2 class="chapter-title">Los 3 prompts de revisión</h2>
+      </div>
+      <div class="prose reveal">
+        <p>Después de la primera respuesta, no te quedes ahí. Estos tres prompts sacan más valor sin reescribir todo desde cero.</p>
+      </div>
+
+      <p class="callout reveal">
+        <span class="callout-icon">🔁</span> "¿Qué información te faltó de mi parte para que esta respuesta fuera perfecta?"
+        <span class="callout-follow">→ Te dice exactamente qué contexto omitiste. La siguiente vuelta ya sale más precisa.</span>
+      </p>
+
+      <p class="callout reveal">
+        <span class="callout-icon">🎯</span> "Dame 3 versiones alternativas con enfoques distintos"
+        <span class="callout-follow">→ Comparas ángulos antes de decidir. Evitas quedarte con la primera idea.</span>
+      </p>
+
+      <p class="callout reveal">
+        <span class="callout-icon">🧠</span> "¿Qué suposiciones hiciste al responder esto?"
+        <span class="callout-follow">→ Destapa lo que el modelo inventó o asumió. Corriges antes de confiar ciegamente.</span>
+      </p>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <span class="mark">
+        <img src="imagenes/ChatGPT Image 19 may 2026, 06_42_50 p.m..png" alt="Claude" style="height:24px; width:auto; object-fit:contain; vertical-align:middle; filter:brightness(1.1);">
+        Mis apuntes
+      </span>
+      <p>Todo lo que nadie te explica — en lenguaje normal</p>
+    </div>
+  </footer>
+
+  </div>
+
+<script>
+  (function () {
+    if (!('IntersectionObserver' in window)) {
+      document.querySelectorAll('.reveal').forEach(function (el) {
+        el.classList.add('is-visible');
+      });
+      return;
+    }
+
+    var narrow = typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 767px)').matches;
+    var rootMargin = narrow ? '0px 0px -12% 0px' : '0px 0px -8% 0px';
+    var threshold = narrow ? 0.06 : 0.12;
+
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          var el = entry.target;
+          var delay = parseInt(el.dataset.delay || '0', 10);
+          setTimeout(function () { el.classList.add('is-visible'); }, delay);
+          observer.unobserve(el);
+        }
+      });
+    }, {
+      threshold: threshold,
+      rootMargin: rootMargin
+    });
+
+    document.querySelectorAll('.reveal').forEach(function (el) {
+      var parent = el.parentElement;
+      var siblings = parent ? parent.querySelectorAll(':scope > .reveal') : [];
+      if (siblings.length > 1) {
+        var indexInGroup = Array.prototype.indexOf.call(siblings, el);
+        if (indexInGroup > 0) {
+          var step = narrow ? 70 : 90;
+          el.dataset.delay = String(Math.min(indexInGroup * step, narrow ? 280 : 360));
+        }
+      }
+      observer.observe(el);
+    });
+  })();
+</script>
+
+</body>
+</html>

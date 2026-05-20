@@ -1,0 +1,9 @@
+{
+  "name": "mis-apuntes-claude",
+  "private": true,
+  "description": "Landings estáticas — Mis apuntes de Claude (Día 1 y Día 2)",
+  "scripts": {
+    "dev": "npx --yes serve . -l 3000",
+    "start": "npm run dev"
+  }
+}

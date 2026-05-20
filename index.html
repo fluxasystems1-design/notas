@@ -114,6 +114,9 @@
     vertical-align: middle;
   }
   footer p { font-size: 13px; }
+  footer .footer-lessons { margin-top: 16px; font-size: 12px; }
+  footer .footer-lessons a { color: #8a8a8a; text-decoration: underline; }
+  footer .footer-lessons a:last-child { color: var(--color-accent); }
 
   /* ---------- GUÍA: apuntes ---------- */
   .guide-intro {
@@ -407,6 +410,39 @@
 
   section[id^="ap-"] { scroll-margin-top: max(1rem, env(safe-area-inset-top)); }
 
+  .lesson-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    padding: 10px max(1.125rem, env(safe-area-inset-left));
+    padding-top: max(10px, env(safe-area-inset-top));
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(10, 10, 10, 0.06);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .lesson-nav a {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-decoration: none;
+    padding: 8px 14px;
+    border-radius: 999px;
+    color: var(--color-muted);
+    border: 1px solid var(--color-line);
+    transition: color 0.2s, background 0.2s, border-color 0.2s;
+  }
+  .lesson-nav a:hover { color: var(--color-accent); border-color: var(--color-accent); }
+  .lesson-nav a.is-active {
+    color: #fff;
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+  .lesson-nav .nav-label-long { display: none; }
+
   .scroll-table {
     overscroll-behavior-x: contain;
     scrollbar-width: thin;
@@ -414,6 +450,27 @@
 
   @media (max-width: 767px) {
     body { background-attachment: scroll; }
+    .lesson-nav {
+      flex-wrap: nowrap;
+      justify-content: center;
+      gap: 6px;
+      padding: max(6px, env(safe-area-inset-top)) max(1.125rem, env(safe-area-inset-left)) 6px max(1.125rem, env(safe-area-inset-right));
+      background: rgba(255, 255, 255, 0.38);
+    }
+    .lesson-nav a {
+      flex: 0 1 auto;
+      text-align: center;
+      padding: 5px 12px;
+      font-size: 12px;
+      letter-spacing: 0.02em;
+      background: rgba(255, 255, 255, 0.4);
+      border-color: rgba(10, 10, 10, 0.08);
+    }
+    .lesson-nav a.is-active {
+      background: color-mix(in srgb, var(--color-accent) 58%, transparent);
+      border-color: color-mix(in srgb, var(--color-accent) 58%, transparent);
+    }
+    footer .footer-lessons { display: none; }
 
     .scroll-table th,
     .scroll-table td {
@@ -430,6 +487,8 @@
 
   /* ---------- DESKTOP (>= 768px) ---------- */
   @media (min-width: 768px) {
+    .lesson-nav .nav-label-short { display: none; }
+    .lesson-nav .nav-label-long { display: inline; }
     .container { max-width: 880px; padding: 0 40px; }
     section { padding: 120px 0; }
 
@@ -443,6 +502,11 @@
 </style>
 </head>
 <body>
+
+  <nav class="lesson-nav" aria-label="Lecciones del curso">
+    <a href="index.html" class="is-active"><span class="nav-label-short">Día 1</span><span class="nav-label-long">Día 1 · Intro a Claude</span></a>
+    <a href="dia2.html"><span class="nav-label-short">Día 2</span><span class="nav-label-long">Día 2 · La fórmula del prompt</span></a>
+  </nav>
 
   <!-- ============ GUÍA: INTRO + ÍNDICE ============ -->
   <section class="guide-intro">
@@ -813,6 +877,7 @@
     <div class="container">
       <span class="mark">Mis apuntes<span class="dot"></span></span>
       <p>Todo lo que nadie te explica — en lenguaje normal</p>
+      <p class="footer-lessons"><a href="index.html">Día 1</a> · <a href="dia2.html">Día 2 — prompts</a></p>
     </div>
   </footer>
 
